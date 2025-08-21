@@ -23,33 +23,33 @@ const Header = () => {
       {/* Top Bar */}
       <div className="bg-accent text-accent-foreground py-2">
         <div className="container flex items-center justify-between text-sm">
-          <span>TAKE CARE OF YOUR Health 25% OFF USE CODE * DOFIXQ3 *</span>
+          <span>PRENEZ SOIN DE VOTRE SANTÉ 25% DE RÉDUCTION CODE * DOFIXQ3 *</span>
           <div className="flex items-center space-x-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-accent-foreground hover:text-accent-foreground">
-                  English <ChevronDown className="ml-1 h-3 w-3" />
+                  Français <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuItem>Français</DropdownMenuItem>
                 <DropdownMenuItem>English</DropdownMenuItem>
-                <DropdownMenuItem>Spanish</DropdownMenuItem>
-                <DropdownMenuItem>French</DropdownMenuItem>
+                <DropdownMenuItem>Español</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-accent-foreground hover:text-accent-foreground">
-                  USD <ChevronDown className="ml-1 h-3 w-3" />
+                  FCFA <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>USD - US Dollar</DropdownMenuItem>
+                <DropdownMenuItem>FCFA - Franc CFA</DropdownMenuItem>
                 <DropdownMenuItem>EUR - Euro</DropdownMenuItem>
-                <DropdownMenuItem>GBP - British Pound</DropdownMenuItem>
+                <DropdownMenuItem>USD - Dollar US</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <span>Setting</span>
+            <span>Paramètres</span>
           </div>
         </div>
       </div>
@@ -68,17 +68,17 @@ const Header = () => {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <Link to="/" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                  Home
+                  Accueil
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/about" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                  About
+                  À propos
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/shop" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                  Shop
+                  Boutique
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
@@ -87,14 +87,14 @@ const Header = () => {
                   <div className="grid gap-3 p-6 w-[400px]">
                     <NavigationMenuLink asChild>
                       <Link to="/shop" className="block p-3 hover:bg-accent rounded-md">
-                        <div className="text-sm font-medium">Shop</div>
-                        <p className="text-sm text-muted-foreground">Browse our products</p>
+                        <div className="text-sm font-medium">Boutique</div>
+                        <p className="text-sm text-muted-foreground">Parcourir nos produits</p>
                       </Link>
                     </NavigationMenuLink>
                     <NavigationMenuLink asChild>
                       <Link to="/product-details" className="block p-3 hover:bg-accent rounded-md">
-                        <div className="text-sm font-medium">Product Details</div>
-                        <p className="text-sm text-muted-foreground">View product information</p>
+                        <div className="text-sm font-medium">Détails Produit</div>
+                        <p className="text-sm text-muted-foreground">Voir les informations produit</p>
                       </Link>
                     </NavigationMenuLink>
                   </div>
@@ -120,7 +120,7 @@ const Header = () => {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search..."
+                placeholder="Rechercher..."
                 className="pl-10 w-64 rounded-full"
               />
             </div>
@@ -147,10 +147,10 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>My Account</DropdownMenuItem>
-                <DropdownMenuItem>Orders</DropdownMenuItem>
-                <DropdownMenuItem>Wishlist</DropdownMenuItem>
-                <DropdownMenuItem>Sign Out</DropdownMenuItem>
+                <DropdownMenuItem>Mon Compte</DropdownMenuItem>
+                <DropdownMenuItem>Commandes</DropdownMenuItem>
+                <DropdownMenuItem>Liste de Souhaits</DropdownMenuItem>
+                <DropdownMenuItem>Se Déconnecter</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 

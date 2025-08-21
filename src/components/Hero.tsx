@@ -14,23 +14,23 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-          Discover Amazing
-          <span className="block text-accent">Fashion Trends</span>
+          Découvrez des
+          <span className="block text-accent">Tendances Mode Incroyables</span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
-          Explore our curated collection of premium fashion items that define your unique style
+          Explorez notre collection soigneusement sélectionnée d'articles de mode premium qui définissent votre style unique
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-6 text-lg">
-            Buy Now
+            Acheter Maintenant
           </Button>
           <Button 
             size="lg" 
             variant="outline" 
             className="border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg"
           >
-            View Details
+            Voir Détails
           </Button>
         </div>
       </div>

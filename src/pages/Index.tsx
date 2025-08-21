@@ -6,38 +6,41 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import BlogSection from "@/components/BlogSection";
 import Footer from "@/components/Footer";
 
-// Sample product data
+/**
+ * Données d'exemple des produits
+ * Prix en Franc CFA (FCFA)
+ */
 const newArrivals = [
   {
     id: 1,
     image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=400&fit=crop",
-    title: "Premium Cotton T-Shirt",
-    price: 29.99,
-    originalPrice: 39.99,
+    title: "T-Shirt Premium en Coton",
+    price: 14950,
+    originalPrice: 19990,
     discount: 25,
     isNew: true
   },
   {
     id: 2,
     image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop",
-    title: "Elegant Summer Dress",
-    price: 89.99,
+    title: "Robe d'Été Élégante",
+    price: 44995,
     isNew: true
   },
   {
     id: 3,
     image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400&h=400&fit=crop",
-    title: "Classic Denim Jacket",
-    price: 79.99,
-    originalPrice: 99.99,
+    title: "Veste en Jean Classique",
+    price: 39995,
+    originalPrice: 49995,
     discount: 20,
     isNew: true
   },
   {
     id: 4,
     image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-    title: "Athletic Sneakers",
-    price: 129.99,
+    title: "Baskets de Sport",
+    price: 64995,
     isNew: true
   }
 ];
@@ -113,10 +116,10 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <ProductSection title="New Arrivals" products={newArrivals} viewAllLink="/new-arrivals" />
-      <ProductSection title="Featured Products" products={featuredProducts} viewAllLink="/featured" />
+      <ProductSection title="Nouveautés" products={newArrivals} viewAllLink="/nouveautes" />
+      <ProductSection title="Produits Vedettes" products={featuredProducts} viewAllLink="/vedettes" />
       <BenefitsSection />
-      <ProductSection title="Deals of the Week" products={dealsOfTheWeek} viewAllLink="/deals" />
+      <ProductSection title="Offres de la Semaine" products={dealsOfTheWeek} viewAllLink="/offres" />
       <TestimonialsSection />
       <BlogSection />
       <Footer />

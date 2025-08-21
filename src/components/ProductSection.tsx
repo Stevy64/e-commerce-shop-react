@@ -24,7 +24,7 @@ const ProductSection = ({ title, products, viewAllLink }: ProductSectionProps) =
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-foreground">{title}</h2>
           {viewAllLink && (
-            <Button variant="outline">View All</Button>
+            <Button variant="outline">Voir Tout</Button>
           )}
         </div>
         

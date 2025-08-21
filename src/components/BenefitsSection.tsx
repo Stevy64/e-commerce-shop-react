@@ -1,25 +1,29 @@
 import { Truck, Shield, Headphones, Award } from "lucide-react";
 
+/**
+ * Liste des avantages et services proposés
+ * Affichage des points forts de l'entreprise avec icônes
+ */
 const benefits = [
   {
     icon: Truck,
-    title: "Free Delivery",
-    description: "Free shipping on orders over $50"
+    title: "Livraison Gratuite",
+    description: "Livraison gratuite sur les commandes de plus de 25 000 FCFA"
   },
   {
     icon: Shield,
-    title: "Money Back Guarantee",
-    description: "30-day money back guarantee"
+    title: "Garantie Satisfait ou Remboursé",
+    description: "Garantie de remboursement sous 30 jours"
   },
   {
     icon: Headphones,
-    title: "24/7 Support",
-    description: "Round-the-clock customer service"
+    title: "Support 24h/7j",
+    description: "Service client disponible en permanence"
   },
   {
     icon: Award,
-    title: "Reliability",
-    description: "Trusted by thousands of customers"
+    title: "Fiabilité",
+    description: "Fait confiance par des milliers de clients"
   }
 ];
 

@@ -2,6 +2,7 @@ import { Heart, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatPrice } from "@/utils/currency";
 
 interface ProductCardProps {
   image: string;
@@ -32,7 +33,7 @@ const ProductCard = ({
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {isNew && (
-            <Badge className="bg-accent text-accent-foreground">New</Badge>
+            <Badge className="bg-accent text-accent-foreground">Nouveau</Badge>
           )}
           {discount && (
             <Badge variant="destructive">-{discount}%</Badge>
@@ -53,21 +54,21 @@ const ProductCard = ({
         <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
           <Button className="w-full rounded-none bg-primary hover:bg-primary/90">
             <ShoppingCart className="mr-2 h-4 w-4" />
-            Add to Cart
+            Ajouter au Panier
           </Button>
         </div>
       </div>
 
       <CardContent className="p-4">
         <h3 className="font-medium text-foreground mb-2 line-clamp-2">{title}</h3>
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-primary">${price}</span>
-          {originalPrice && (
-            <span className="text-sm text-muted-foreground line-through">
-              ${originalPrice}
-            </span>
-          )}
-        </div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-primary">{formatPrice(price)}</span>
+            {originalPrice && (
+              <span className="text-sm text-muted-foreground line-through">
+                {formatPrice(originalPrice)}
+              </span>
+            )}
+          </div>
       </CardContent>
     </Card>
   );
