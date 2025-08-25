@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
-import { useCart } from "@/hooks/useCart";
-import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCartDjango";
+import { useAuth } from "@/hooks/useAuthDjango";
 import { formatPrice } from "@/utils/currency";
 import { Link } from "react-router-dom";
 

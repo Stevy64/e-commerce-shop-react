@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/currency";
-import { useCart } from "@/hooks/useCart";
-import { useWishlist } from "@/hooks/useWishlist";
+import { useCart } from "@/hooks/useCartDjango";
+import { useWishlist } from "@/hooks/useWishlistDjango";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
