@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Grid, List, Filter } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Shop = () => {
   const products = [
@@ -98,24 +99,88 @@ const Shop = () => {
       </section>
 
       {/* Shop Content */}
-      <section className="py-12">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Sidebar Filters */}
-            <div className="lg:col-span-1">
+      <section className="py-6 sm:py-12">
+        <div className="container px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-4">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filtres
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] overflow-y-auto">
+                  <div className="space-y-6 pt-6">
+                    {/* Mobile Filters Content - Same as desktop sidebar */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Rechercher</h3>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input placeholder="Rechercher..." className="pl-10" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Catégories</h3>
+                      <div className="space-y-2">
+                        {categories.map((category) => (
+                          <div key={category} className="flex items-center space-x-2">
+                            <Checkbox id={`mobile-${category}`} />
+                            <label htmlFor={`mobile-${category}`} className="text-sm cursor-pointer">
+                              {category}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Gamme de prix</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Input type="number" placeholder="Min" className="w-20" />
+                          <span>-</span>
+                          <Input type="number" placeholder="Max" className="w-20" />
+                        </div>
+                        <Button size="sm" className="w-full">Filtrer</Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Marques</h3>
+                      <div className="space-y-2">
+                        {brands.map((brand) => (
+                          <div key={brand} className="flex items-center space-x-2">
+                            <Checkbox id={`mobile-${brand}`} />
+                            <label htmlFor={`mobile-${brand}`} className="text-sm cursor-pointer">
+                              {brand}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            {/* Desktop Sidebar Filters */}
+            <div className="lg:col-span-1 hidden lg:block">
               <div className="space-y-8">
                 {/* Search */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Search Products</h3>
+                  <h3 className="text-lg font-semibold mb-4">Rechercher</h3>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Search..." className="pl-10" />
+                    <Input placeholder="Rechercher..." className="pl-10" />
                   </div>
                 </div>
 
                 {/* Categories */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Categories</h3>
+                  <h3 className="text-lg font-semibold mb-4">Catégories</h3>
                   <div className="space-y-2">
                     {categories.map((category) => (
                       <div key={category} className="flex items-center space-x-2">
@@ -130,20 +195,20 @@ const Shop = () => {
 
                 {/* Price Range */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Price Range</h3>
+                  <h3 className="text-lg font-semibold mb-4">Gamme de prix</h3>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Input type="number" placeholder="Min" className="w-20" />
                       <span>-</span>
                       <Input type="number" placeholder="Max" className="w-20" />
                     </div>
-                    <Button size="sm" className="w-full">Filter</Button>
+                    <Button size="sm" className="w-full">Filtrer</Button>
                   </div>
                 </div>
 
                 {/* Brands */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Brands</h3>
+                  <h3 className="text-lg font-semibold mb-4">Marques</h3>
                   <div className="space-y-2">
                     {brands.map((brand) => (
                       <div key={brand} className="flex items-center space-x-2">
@@ -161,41 +226,41 @@ const Shop = () => {
             {/* Main Content */}
             <div className="lg:col-span-3">
               {/* Toolbar */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-muted-foreground">
-                    Showing 1-{products.length} of {products.length} results
+                    Affichage 1-{products.length} sur {products.length} résultats
                   </span>
                 </div>
                 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
                   <Select defaultValue="default">
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Sort by" />
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue placeholder="Trier par" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="default">Default sorting</SelectItem>
-                      <SelectItem value="popularity">Sort by popularity</SelectItem>
-                      <SelectItem value="rating">Sort by average rating</SelectItem>
-                      <SelectItem value="date">Sort by latest</SelectItem>
-                      <SelectItem value="price">Sort by price: low to high</SelectItem>
-                      <SelectItem value="price-desc">Sort by price: high to low</SelectItem>
+                      <SelectItem value="default">Tri par défaut</SelectItem>
+                      <SelectItem value="popularity">Trier par popularité</SelectItem>
+                      <SelectItem value="rating">Trier par note</SelectItem>
+                      <SelectItem value="date">Trier par nouveauté</SelectItem>
+                      <SelectItem value="price">Prix: croissant</SelectItem>
+                      <SelectItem value="price-desc">Prix: décroissant</SelectItem>
                     </SelectContent>
                   </Select>
                   
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="icon">
-                      <Grid className="h-4 w-4" />
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                      <Grid className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
-                      <List className="h-4 w-4" />
+                    <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                      <List className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 </div>
               </div>
 
               {/* Products Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {products.map((product) => (
                   <ProductCard key={product.id} {...product} />
                 ))}
@@ -203,12 +268,12 @@ const Shop = () => {
 
               {/* Pagination */}
               <div className="flex justify-center">
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm">Previous</Button>
-                  <Button variant="outline" size="sm" className="bg-primary text-primary-foreground">1</Button>
-                  <Button variant="outline" size="sm">2</Button>
-                  <Button variant="outline" size="sm">3</Button>
-                  <Button variant="outline" size="sm">Next</Button>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm">Précédent</Button>
+                  <Button variant="outline" size="sm" className="bg-primary text-primary-foreground text-xs sm:text-sm">1</Button>
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm">2</Button>
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm">3</Button>
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm">Suivant</Button>
                 </div>
               </div>
             </div>

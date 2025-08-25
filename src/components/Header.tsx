@@ -1,7 +1,8 @@
-import { Search, Heart, ShoppingCart, User, ChevronDown, Menu } from "lucide-react";
+import { Search, Heart, ShoppingCart, User, ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,19 +17,25 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Header = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <>
       {/* Top Bar */}
       <div className="bg-accent text-accent-foreground py-2">
         <div className="container flex items-center justify-between text-sm">
-          <span>PRENEZ SOIN DE VOTRE SANTÉ 25% DE RÉDUCTION CODE * DOFIXQ3 *</span>
-          <div className="flex items-center space-x-4">
+          <span className="hidden sm:block">PRENEZ SOIN DE VOTRE SANTÉ 25% DE RÉDUCTION CODE * DOFIXQ3 *</span>
+          <span className="sm:hidden text-xs">25% DE RÉDUCTION CODE * DOFIXQ3 *</span>
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-accent-foreground hover:text-accent-foreground">
-                  Français <ChevronDown className="ml-1 h-3 w-3" />
+                  <span className="hidden sm:inline">Français</span>
+                  <span className="sm:hidden">FR</span>
+                  <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -49,18 +56,18 @@ const Header = () => {
                 <DropdownMenuItem>USD - Dollar US</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <span>Paramètres</span>
+            <span className="hidden sm:inline">Paramètres</span>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-20 items-center justify-between">
+        <div className="container flex h-16 sm:h-20 items-center justify-between px-4">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-primary mr-2"></div>
-            <h1 className="text-3xl font-bold text-foreground">ADDINA</h1>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary mr-2"></div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">ADDINA</h1>
           </Link>
 
           {/* Navigation Menu */}
@@ -114,39 +121,46 @@ const Header = () => {
           </NavigationMenu>
 
           {/* Right Side */}
-          <div className="flex items-center space-x-4">
-            {/* Search */}
-            <div className="relative hidden md:block">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Search - Hidden on mobile */}
+            <div className="relative hidden lg:block">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Rechercher..."
-                className="pl-10 w-64 rounded-full"
+                className="pl-10 w-48 xl:w-64 rounded-full"
               />
             </div>
 
+            {/* Search icon for mobile/tablet */}
+            <Button variant="ghost" size="icon" className="lg:hidden">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+
             {/* Icons */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Heart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
+            <Button variant="ghost" size="icon" className="relative hidden sm:flex">
+              <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
                 2
               </span>
             </Button>
 
             <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
+              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
                 3
               </span>
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="hidden sm:flex">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem>S'inscrire</DropdownMenuItem>
+                <DropdownMenuItem>Se connecter</DropdownMenuItem>
                 <DropdownMenuItem>Mon Compte</DropdownMenuItem>
                 <DropdownMenuItem>Commandes</DropdownMenuItem>
                 <DropdownMenuItem>Liste de Souhaits</DropdownMenuItem>
@@ -155,9 +169,65 @@ const Header = () => {
             </DropdownMenu>
 
             {/* Mobile Menu */}
-            <Button variant="ghost" size="icon" className="lg:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <nav className="flex flex-col space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold">Menu</h2>
+                  </div>
+                  
+                  {/* Mobile Search */}
+                  <div className="relative lg:hidden">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Rechercher..."
+                      className="pl-10 rounded-full"
+                    />
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="space-y-2">
+                    <Link to="/" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                      Accueil
+                    </Link>
+                    <Link to="/about" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                      À propos
+                    </Link>
+                    <Link to="/shop" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                      Boutique
+                    </Link>
+                    <Link to="/blog" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                      Blog
+                    </Link>
+                    <Link to="/contact" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                      Contact
+                    </Link>
+                  </div>
+
+                  {/* Mobile User Actions */}
+                  <div className="border-t pt-4 space-y-2">
+                    <Button variant="outline" className="w-full justify-start">
+                      <User className="h-4 w-4 mr-2" />
+                      S'inscrire
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <User className="h-4 w-4 mr-2" />
+                      Se connecter
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start sm:hidden">
+                      <Heart className="h-4 w-4 mr-2" />
+                      Liste de souhaits (2)
+                    </Button>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
