@@ -160,6 +160,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",  # Vite dev server (utilisé par le projet)
     "http://127.0.0.1:5173",
+    "http://localhost:8081",  # Port utilisé par le frontend Gabomazone
+    "http://127.0.0.1:8081",
 ]
 
 # Pour le développement, permettre toutes les origines
@@ -190,6 +192,12 @@ CORS_ALLOW_METHODS = [
 
 # Configuration pour les cookies (si nécessaire)
 CORS_ALLOW_CREDENTIALS = True
+
+# Backend d'authentification personnalisé pour accepter email ou username
+AUTHENTICATION_BACKENDS = [
+    'shop.authentication.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # Configuration spécifique pour l'e-commerce ADDINA
 ADDINA_SETTINGS = {

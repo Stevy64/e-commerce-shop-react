@@ -27,6 +27,7 @@ const Auth = () => {
       setLoading(true);
       
       try {
+        // Utiliser l'email comme username pour la connexion Django
         await signIn(email, password);
         toast({
           title: "Connexion réussie",
@@ -34,10 +35,11 @@ const Auth = () => {
         });
         navigate('/');
       } catch (error: any) {
+        console.error('Erreur de connexion:', error);
         toast({
           variant: "destructive",
           title: "Erreur de connexion",
-          description: error.message || "Identifiants incorrects",
+          description: error.response?.data?.detail || error.message || "Identifiants incorrects",
         });
       } finally {
         setLoading(false);

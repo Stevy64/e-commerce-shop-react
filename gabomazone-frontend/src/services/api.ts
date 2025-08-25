@@ -8,7 +8,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 // Configuration de l'API
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8002/api';
 
 // Interface pour les types de données (compatibles avec Supabase)
 export interface User {
