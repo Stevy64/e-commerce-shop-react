@@ -49,15 +49,15 @@ export const useCart = () => {
       await apiService.addToCart(productId, quantity);
       toast({
         title: "Produit ajouté",
-        description: "Le produit a été ajouté au panier",
+        description: "Le produit a été ajouté à votre panier avec succès",
       });
-      await fetchCartItems();
+      await fetchCartItems(); // Recharger le panier
     } catch (error) {
       console.error('Erreur lors de l\'ajout au panier:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible d'ajouter au panier",
+        description: "Impossible d'ajouter le produit au panier",
       });
     }
   };

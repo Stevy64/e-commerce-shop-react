@@ -51,13 +51,13 @@ export const useWishlist = () => {
         title: "Ajouté aux favoris",
         description: "Le produit a été ajouté à votre liste de souhaits",
       });
-      await fetchWishlistItems();
+      await fetchWishlistItems(); // Recharger la wishlist
     } catch (error) {
       console.error('Erreur lors de l\'ajout à la liste de souhaits:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible d'ajouter à la liste de souhaits",
+        description: "Impossible d'ajouter le produit à la liste de souhaits",
       });
     }
   };

@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/currency";
 import { useCart } from "@/hooks/useCartDjango";
 import { useWishlist } from "@/hooks/useWishlistDjango";
+import { useAuth } from "@/hooks/useAuthDjango";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
   id?: string;
@@ -28,14 +30,26 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemByProductId } = useWishlist();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   
   const handleAddToCart = () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
     if (id) {
       addToCart(id);
     }
   };
 
   const handleToggleWishlist = () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
     if (!id) return;
     
     if (isInWishlist(id)) {
