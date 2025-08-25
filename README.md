@@ -1,73 +1,82 @@
-# Welcome to your Lovable project
+# 🛒 Gabomazone - E-commerce Platform
 
-## Project info
+Application e-commerce complète avec frontend React et backend Django API.
 
-**URL**: https://lovable.dev/projects/4f10cfd8-71bd-4139-9eda-afa0298dc735
+## 📁 Structure du Projet
 
-## How can I edit this code?
+```
+├── gabomazone-frontend/     # Frontend React TypeScript
+│   ├── src/                # Code source React
+│   ├── public/             # Assets statiques
+│   └── package.json        # Dépendances Node.js
+├── gabomazone_backend/     # Backend Django API
+│   ├── ecommerce_api/      # Configuration Django
+│   ├── shop/               # Application e-commerce
+│   ├── manage.py           # Gestionnaire Django
+│   └── requirements.txt    # Dépendances Python
+├── MIGRATION_GUIDE.md      # Guide de migration détaillé
+├── INSTALLATION_RAPIDE.md  # Installation en 10 minutes
+└── README_MIGRATION.md     # Documentation de migration
+```
 
-There are several ways of editing your application.
+## 🚀 Installation Rapide
 
-**Use Lovable**
+### 1. Backend Django
+```bash
+cd gabomazone_backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python populate_data.py
+python manage.py runserver 0.0.0.0:8000
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4f10cfd8-71bd-4139-9eda-afa0298dc735) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 2. Frontend React
+```bash
+cd gabomazone-frontend
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### 3. Accès
+- **Application :** http://localhost:8081
+- **API Django :** http://localhost:8000/api/products/
+- **Admin Django :** http://localhost:8000/admin/
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## ✨ Fonctionnalités
 
-**Use GitHub Codespaces**
+- 🔐 **Authentification JWT**
+- 🛍️ **Catalogue produits avec pagination**
+- 🛒 **Gestion panier et liste de souhaits**
+- 📦 **Système de commandes**
+- 👨‍💼 **Interface d'administration Django**
+- 📱 **Design responsive**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🛠 Technologies
 
-## What technologies are used for this project?
+**Frontend :** React 18, TypeScript, Vite, Tailwind CSS, Axios  
+**Backend :** Django 5.2, Django REST Framework, JWT, SQLite/PostgreSQL
 
-This project is built with:
+## 📚 Documentation
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **MIGRATION_GUIDE.md** - Guide détaillé de migration Supabase → Django
+- **INSTALLATION_RAPIDE.md** - Installation en 10 minutes
+- **README_MIGRATION.md** - Vue d'ensemble de la migration
 
-## How can I deploy this project?
+## 🎯 Migration Supabase → Django
 
-Simply open [Lovable](https://lovable.dev/projects/4f10cfd8-71bd-4139-9eda-afa0298dc735) and click on Share -> Publish.
+Ce projet est le résultat d'une migration complète de Supabase vers Django API, conservant le même frontend React tout en remplaçant le backend par une solution Django personnalisée.
 
-## Can I connect a custom domain to my Lovable project?
+**Avantages de la migration :**
+- ✅ Contrôle total du backend
+- ✅ Coûts maîtrisés
+- ✅ Performance optimisée
+- ✅ Sécurité renforcée
+- ✅ Évolutivité sur mesure
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+**Auteur :** Manus AI  
+**Version :** 1.0  
+**Date :** 25 août 2025
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
