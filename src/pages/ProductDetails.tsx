@@ -288,7 +288,15 @@ const ProductDetails = () => {
             <h2 className="text-3xl font-bold text-foreground mb-8">Related Products</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((product) => (
-                <ProductCard key={product.id} {...product} />
+                <ProductCard 
+                  key={product.id} 
+                  id={product.id.toString()}
+                  image={product.image}
+                  title={product.title}
+                  price={product.price}
+                  originalPrice={product.originalPrice}
+                  discount={product.discount}
+                />
               ))}
             </div>
           </div>

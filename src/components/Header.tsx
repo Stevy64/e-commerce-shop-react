@@ -1,8 +1,11 @@
-import { Search, Heart, ShoppingCart, User, ChevronDown, Menu, X } from "lucide-react";
+import { Search, Heart, ShoppingCart, User, ChevronDown, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +24,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const { getCartItemsCount } = useCart();
 
   return (
     <>
@@ -145,12 +150,16 @@ const Header = () => {
               </span>
             </Button>
 
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                {getCartItemsCount() > 0 && (
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {getCartItemsCount()}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -159,12 +168,26 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>S'inscrire</DropdownMenuItem>
-                <DropdownMenuItem>Se connecter</DropdownMenuItem>
-                <DropdownMenuItem>Mon Compte</DropdownMenuItem>
-                <DropdownMenuItem>Commandes</DropdownMenuItem>
-                <DropdownMenuItem>Liste de Souhaits</DropdownMenuItem>
-                <DropdownMenuItem>Se Déconnecter</DropdownMenuItem>
+                {user ? (
+                  <>
+                    <DropdownMenuItem>Mon Compte</DropdownMenuItem>
+                    <DropdownMenuItem>Commandes</DropdownMenuItem>
+                    <DropdownMenuItem>Liste de Souhaits</DropdownMenuItem>
+                    <DropdownMenuItem onClick={signOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Se Déconnecter
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/auth">
+                      <DropdownMenuItem>S'inscrire</DropdownMenuItem>
+                    </Link>
+                    <Link to="/auth">
+                      <DropdownMenuItem>Se connecter</DropdownMenuItem>
+                    </Link>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -212,18 +235,41 @@ const Header = () => {
 
                   {/* Mobile User Actions */}
                   <div className="border-t pt-4 space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
-                      <User className="h-4 w-4 mr-2" />
-                      S'inscrire
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <User className="h-4 w-4 mr-2" />
-                      Se connecter
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start sm:hidden">
-                      <Heart className="h-4 w-4 mr-2" />
-                      Liste de souhaits (2)
-                    </Button>
+                    {user ? (
+                      <>
+                        <Button variant="outline" className="w-full justify-start">
+                          <User className="h-4 w-4 mr-2" />
+                          Mon Compte
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start sm:hidden">
+                          <Heart className="h-4 w-4 mr-2" />
+                          Liste de souhaits
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => { signOut(); setMobileMenuOpen(false); }}>
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Se Déconnecter
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Link to="/auth">
+                          <Button variant="outline" className="w-full justify-start" onClick={() => setMobileMenuOpen(false)}>
+                            <User className="h-4 w-4 mr-2" />
+                            S'inscrire
+                          </Button>
+                        </Link>
+                        <Link to="/auth">
+                          <Button variant="outline" className="w-full justify-start" onClick={() => setMobileMenuOpen(false)}>
+                            <User className="h-4 w-4 mr-2" />
+                            Se connecter
+                          </Button>
+                        </Link>
+                        <Button variant="outline" className="w-full justify-start sm:hidden">
+                          <Heart className="h-4 w-4 mr-2" />
+                          Liste de souhaits
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </nav>
               </SheetContent>

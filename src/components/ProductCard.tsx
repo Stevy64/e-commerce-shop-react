@@ -3,8 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/currency";
+import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
+  id?: string;
   image: string;
   title: string;
   price: number;
@@ -14,6 +18,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ 
+  id,
   image, 
   title, 
   price, 
@@ -21,6 +26,30 @@ const ProductCard = ({
   discount, 
   isNew 
 }: ProductCardProps) => {
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemByProductId } = useWishlist();
+  
+  const handleAddToCart = () => {
+    if (id) {
+      addToCart(id);
+    }
+  };
+
+  const handleToggleWishlist = () => {
+    if (!id) return;
+    
+    if (isInWishlist(id)) {
+      const wishlistItem = getWishlistItemByProductId(id);
+      if (wishlistItem) {
+        removeFromWishlist(wishlistItem.id);
+      }
+    } else {
+      addToWishlist(id);
+    }
+  };
+
+  const inWishlist = id ? isInWishlist(id) : false;
+
   return (
     <Card className="group relative overflow-hidden border-0 shadow-sm hover:shadow-lg transition-shadow duration-300">
       <div className="relative aspect-square overflow-hidden">
@@ -42,8 +71,16 @@ const ProductCard = ({
 
         {/* Quick Actions */}
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button size="icon" variant="secondary" className="h-8 w-8">
-            <Heart className="h-4 w-4" />
+          <Button 
+            size="icon" 
+            variant="secondary" 
+            className={cn(
+              "h-8 w-8",
+              inWishlist ? "text-red-500" : ""
+            )}
+            onClick={handleToggleWishlist}
+          >
+            <Heart className={cn("h-4 w-4", inWishlist && "fill-current")} />
           </Button>
           <Button size="icon" variant="secondary" className="h-8 w-8">
             <Eye className="h-4 w-4" />
@@ -52,7 +89,10 @@ const ProductCard = ({
 
         {/* Add to Cart Button */}
         <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <Button className="w-full rounded-none bg-primary hover:bg-primary/90">
+          <Button 
+            className="w-full rounded-none bg-primary hover:bg-primary/90"
+            onClick={handleAddToCart}
+          >
             <ShoppingCart className="mr-2 h-4 w-4" />
             Ajouter au Panier
           </Button>

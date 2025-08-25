@@ -7,66 +7,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Grid, List, Filter } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Shop = () => {
-  const products = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop",
-      title: "Alexander roll Arm sofa",
-      price: 150.00,
-      originalPrice: 170.00,
-      discount: 10,
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=400&fit=crop",
-      title: "Brasslegged Armchair",
-      price: 150.00,
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop",
-      title: "Leather Chair",
-      price: 200.00,
-      originalPrice: 220.00,
-      discount: 10,
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop",
-      title: "Chair pillow",
-      price: 49.00,
-    },
-    {
-      id: 5,
-      image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=400&fit=crop",
-      title: "Modern Dining Chair",
-      price: 120.00,
-      originalPrice: 140.00,
-      discount: 15,
-    },
-    {
-      id: 6,
-      image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop",
-      title: "Vintage Armchair",
-      price: 280.00,
-    },
-    {
-      id: 7,
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop",
-      title: "Contemporary Sofa",
-      price: 450.00,
-      originalPrice: 500.00,
-      discount: 10,
-    },
-    {
-      id: 8,
-      image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=400&fit=crop",
-      title: "Office Chair",
-      price: 180.00,
-    },
-  ];
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching products:', error);
+      } else {
+        setProducts(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
 
   const categories = [
     "All Categories",
@@ -260,11 +224,32 @@ const Shop = () => {
               </div>
 
               {/* Products Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                {products.map((product) => (
-                  <ProductCard key={product.id} {...product} />
-                ))}
-              </div>
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="aspect-square bg-muted rounded-lg mb-4"></div>
+                      <div className="h-4 bg-muted rounded mb-2"></div>
+                      <div className="h-4 bg-muted rounded w-1/2"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                  {products.map((product) => (
+                    <ProductCard 
+                      key={product.id} 
+                      id={product.id}
+                      image={product.image_url}
+                      title={product.title}
+                      price={product.price}
+                      originalPrice={product.original_price}
+                      discount={product.discount}
+                      isNew={product.is_new}
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* Pagination */}
               <div className="flex justify-center">
