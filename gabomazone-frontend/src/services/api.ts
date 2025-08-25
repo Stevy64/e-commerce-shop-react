@@ -8,7 +8,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 // Configuration de l'API
-const API_BASE_URL = 'http://localhost:8002/api';
+const API_BASE_URL = 'http://localhost:8000/api';
 
 // Interface pour les types de données (compatibles avec Supabase)
 export interface User {
@@ -174,6 +174,29 @@ class ApiService {
     last_name?: string;
   }): Promise<{ message: string; user: User }> {
     const response = await this.api.post('/auth/register/', userData);
+    return response.data;
+  }
+
+  // Nouvelle méthode pour l'inscription avec confirmation email
+  async registerWithEmail(userData: {
+    username: string;
+    email: string;
+    password: string;
+    password_confirm: string;
+    first_name?: string;
+    last_name?: string;
+  }): Promise<{ message: string; user_id: number; email: string; confirmation_sent: boolean }> {
+    const response = await this.api.post('/auth/register-email/', userData);
+    return response.data;
+  }
+
+  async resendConfirmationEmail(email: string): Promise<{ message: string }> {
+    const response = await this.api.post('/auth/resend-confirmation/', { email });
+    return response.data;
+  }
+
+  async confirmEmail(key: string): Promise<{ message: string; confirmed: boolean }> {
+    const response = await this.api.get(`/auth/confirm-email/${key}/`);
     return response.data;
   }
 

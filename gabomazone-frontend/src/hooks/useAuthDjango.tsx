@@ -87,6 +87,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Nouvelle méthode pour l'inscription avec confirmation email
+  const signUpWithEmail = async (userData: {
+    username: string;
+    email: string;
+    password: string;
+    password_confirm: string;
+    first_name?: string;
+    last_name?: string;
+  }) => {
+    setLoading(true);
+    try {
+      const result = await apiService.registerWithEmail(userData);
+      return result;
+    } catch (error) {
+      console.error('Erreur d\'inscription avec email:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendConfirmationEmail = async (email: string) => {
+    setLoading(true);
+    try {
+      const result = await apiService.resendConfirmationEmail(email);
+      return result;
+    } catch (error) {
+      console.error('Erreur de renvoi d\'email:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmEmail = async (key: string) => {
+    setLoading(true);
+    try {
+      const result = await apiService.confirmEmail(key);
+      return result;
+    } catch (error) {
+      console.error('Erreur de confirmation d\'email:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     setLoading(true);
     try {
@@ -104,11 +151,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     loading,
-    signOut,
     signIn,
-    signUp
+    signUp,
+    signUpWithEmail,
+    resendConfirmationEmail,
+    confirmEmail,
+    signOut,
   };
-
   return (
     <AuthContext.Provider value={value}>
       {children}

@@ -13,6 +13,10 @@ from .views import (
     ProductViewSet, CartItemViewSet, OrderViewSet, WishlistItemViewSet,
     ProfileViewSet, AuthViewSet, CustomTokenObtainPairView
 )
+from .email_views import (
+    register_with_email_confirmation, resend_confirmation_email, 
+    confirm_email_api
+)
 
 # Router pour les ViewSets
 router = DefaultRouter()
@@ -34,6 +38,11 @@ urlpatterns = [
     # Endpoints compatibles avec les hooks React existants
     path('api/auth/user/', AuthViewSet.as_view({'get': 'me'}), name='auth_user'),
     path('api/auth/register/', AuthViewSet.as_view({'post': 'register'}), name='auth_register'),
+    
+    # Nouveaux endpoints avec confirmation email
+    path('api/auth/register-email/', register_with_email_confirmation, name='register_with_email'),
+    path('api/auth/resend-confirmation/', resend_confirmation_email, name='resend_confirmation'),
+    path('api/auth/confirm-email/<str:key>/', confirm_email_api, name='confirm_email_api'),
     
     # Endpoints spéciaux pour le panier et les commandes
     path('api/cart/total/', CartItemViewSet.as_view({'get': 'total'}), name='cart_total'),

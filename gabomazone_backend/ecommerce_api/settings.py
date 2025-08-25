@@ -31,13 +31,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Requis pour allauth
     
-    # Applications tierces pour l'API REST
+    # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     
-    # Applications locales
+    # Local apps
     'shop',
 ]
 
@@ -48,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # Middleware allauth
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -204,5 +209,30 @@ ADDINA_SETTINGS = {
     'CURRENCY': 'FCFA',
     'DEFAULT_LANGUAGE': 'fr',
     'COMPANY_NAME': 'ADDINA',
-    'COMPANY_EMAIL': 'contact@addina.com',
+    'SUPPORT_EMAIL': 'support@addina.com',
 }
+
+# Configuration des sites (requis pour allauth)
+SITE_ID = 1
+
+# Configuration allauth
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+# Configuration email pour le développement (console backend)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@gabomazone.com'
+EMAIL_HOST_USER = 'noreply@gabomazone.com'
+
+# Pour la production, utiliser SMTP:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'votre-email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'votre-mot-de-passe-app'

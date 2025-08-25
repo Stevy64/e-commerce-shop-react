@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,13 +9,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuthDjango";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from "lucide-react";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signUpWithEmail, resendConfirmationEmail } = useAuth();
 
   const SignInForm = () => {
     const [email, setEmail] = useState("");
@@ -147,19 +149,22 @@ const Auth = () => {
       setLoading(true);
       
       try {
-        await signUp(formData);
+        const result = await signUpWithEmail(formData);
         toast({
           title: "Inscription réussie",
-          description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
+          description: result.message,
         });
-        // Basculer vers l'onglet connexion
-        const signinTab = document.querySelector('[value="signin"]') as HTMLElement;
-        signinTab?.click();
+        
+        // Afficher un message de confirmation
+        setShowEmailConfirmation(true);
+        setRegisteredEmail(formData.email);
+        
       } catch (error: any) {
+        console.error('Erreur d\'inscription:', error);
         toast({
           variant: "destructive",
           title: "Erreur d'inscription",
-          description: error.message || "Une erreur est survenue lors de l'inscription",
+          description: error.response?.data?.error || error.message || "Erreur lors de l'inscription",
         });
       } finally {
         setLoading(false);

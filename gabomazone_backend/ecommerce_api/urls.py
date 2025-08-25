@@ -15,6 +15,9 @@ urlpatterns = [
     
     # URLs de l'application shop (API e-commerce)
     path('', include('shop.urls')),
+    
+    # URLs pour allauth (confirmation email, etc.)
+    path('accounts/', include('allauth.urls')),
 ]
 
 # Servir les fichiers media en développement
