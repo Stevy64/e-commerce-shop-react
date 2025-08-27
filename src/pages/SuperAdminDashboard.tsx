@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Store, Package, DollarSign, Crown, Gem, Star, TrendingUp, TrendingDown, Minus, Edit, MessageSquare, Eye, Trash2 } from "lucide-react";
+import { Users, Store, Package, DollarSign, Crown, Gem, Star, TrendingUp, TrendingDown, Minus, Edit, MessageSquare, Eye, Trash2, Filter } from "lucide-react";
+import ConversationDetailsDialog from "@/components/ConversationDetailsDialog";
 import { formatPrice as formatCurrency } from "@/utils/currency";
 import { assignSuperAdminRole } from "@/utils/testSuperAdmin";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,6 +43,9 @@ export default function SuperAdminDashboard() {
   const [activeTab, setActiveTab] = useState("vendors");
   const [editingVendor, setEditingVendor] = useState<any>(null);
   const [vendorEditDialogOpen, setVendorEditDialogOpen] = useState(false);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [conversationDialogOpen, setConversationDialogOpen] = useState(false);
+  const [conversationFilter, setConversationFilter] = useState<string>("all");
 
   if (authLoading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
@@ -169,16 +173,92 @@ export default function SuperAdminDashboard() {
       }
       setSupportTickets(ticketsData || []);
 
-      // Récupérer les conversations (simplifié)
+      // Récupérer les conversations avec détails
       const { data: conversationsData, error: conversationsError } = await supabase
         .from('conversations')
-        .select('*')
+        .select(`
+          *,
+          conversation_participants (
+            user_id,
+            role,
+            profiles (
+              display_name,
+              first_name,
+              last_name
+            )
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (conversationsError) {
         console.error('Erreur conversations:', conversationsError);
       }
-      setConversations(conversationsData || []);
+
+      // Récupérer les conversations de commandes - requête simplifiée
+      const { data: orderConversationsData, error: orderConversationsError } = await supabase
+        .from('order_conversations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (orderConversationsError) {
+        console.error('Erreur order conversations:', orderConversationsError);
+      }
+
+      // Enrichir les conversations de commandes avec des données supplémentaires
+      const enrichedOrderConversations = [];
+      if (orderConversationsData) {
+        for (const oc of orderConversationsData) {
+          // Récupérer les détails de la commande
+          const { data: orderData } = await supabase
+            .from('orders')
+            .select('id, total_amount, status, created_at')
+            .eq('id', oc.order_id)
+            .single();
+
+          // Récupérer les détails du vendeur
+          const { data: vendorData } = await supabase
+            .from('vendors')
+            .select('business_name')
+            .eq('id', oc.vendor_id)
+            .single();
+
+          // Récupérer les détails du client
+          const { data: customerData } = await supabase
+            .from('profiles')
+            .select('display_name, first_name, last_name')
+            .eq('user_id', oc.customer_id)
+            .single();
+
+          enrichedOrderConversations.push({
+            ...oc,
+            type: 'order',
+            title: `Commande #${orderData?.id?.slice(0, 8) || 'N/A'}`,
+            isOrderConversation: true,
+            participantCount: 2,
+            participantNames: `${customerData?.display_name || 'Client'}, ${vendorData?.business_name || 'Vendeur'}`,
+            orders: orderData,
+            vendors: vendorData,
+            profiles: customerData
+          });
+        }
+      }
+      
+      // Combiner toutes les conversations
+      const allConversations = [
+        ...(conversationsData || []).map(conv => ({
+          ...conv,
+          type: conv.type || 'direct',
+          participantCount: conv.conversation_participants?.length || 0,
+          participantNames: conv.conversation_participants?.map((p: any) => 
+            p.profiles?.display_name || 
+            `${p.profiles?.first_name || ''} ${p.profiles?.last_name || ''}`.trim() || 
+            'Utilisateur'
+          ).join(', ') || ''
+        })),
+        ...enrichedOrderConversations
+      ];
+      
+      setConversations(allConversations);
 
       // Calculer les statistiques
       const { count: usersCount } = await supabase
@@ -283,6 +363,34 @@ export default function SuperAdminDashboard() {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'order': return 'Commande';
+      case 'support': return 'Support';
+      case 'direct': return 'Direct';
+      default: return type;
+    }
+  };
+
+  const getTypeBadgeVariant = (type: string) => {
+    switch (type) {
+      case 'order': return 'default';
+      case 'support': return 'destructive';
+      case 'direct': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
+  const filteredConversations = conversations.filter(conv => {
+    if (conversationFilter === "all") return true;
+    return conv.type === conversationFilter;
+  });
+
+  const openConversationDetails = (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+    setConversationDialogOpen(true);
   };
 
   return (
@@ -616,31 +724,108 @@ export default function SuperAdminDashboard() {
           <TabsContent value="messaging">
             <Card>
               <CardHeader>
-                <CardTitle>Conversations</CardTitle>
-                <CardDescription>Surveillez les communications sur la plateforme</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Conversations Vendeur/Client</CardTitle>
+                    <CardDescription>Surveillez toutes les communications sur la plateforme</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    <Select value={conversationFilter} onValueChange={setConversationFilter}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Toutes</SelectItem>
+                        <SelectItem value="order">Commandes</SelectItem>
+                        <SelectItem value="support">Support</SelectItem>
+                        <SelectItem value="direct">Directes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {conversations.length === 0 ? (
+                  {/* Statistiques rapides */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <Card className="p-3">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{conversations.length}</div>
+                        <div className="text-sm text-muted-foreground">Total</div>
+                      </div>
+                    </Card>
+                    <Card className="p-3">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{conversations.filter(c => c.type === 'order').length}</div>
+                        <div className="text-sm text-muted-foreground">Commandes</div>
+                      </div>
+                    </Card>
+                    <Card className="p-3">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{conversations.filter(c => c.type === 'support').length}</div>
+                        <div className="text-sm text-muted-foreground">Support</div>
+                      </div>
+                    </Card>
+                    <Card className="p-3">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">{conversations.filter(c => c.type === 'direct').length}</div>
+                        <div className="text-sm text-muted-foreground">Directes</div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {filteredConversations.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucune conversation</p>
+                      <p>Aucune conversation trouvée</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {conversations.slice(0, 10).map((conversation) => (
-                        <Card key={conversation.id} className="p-4">
+                      {filteredConversations.slice(0, 15).map((conversation) => (
+                        <Card key={conversation.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">{conversation.title || 'Conversation sans titre'}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {conversation.conversation_participants?.length || 0} participant(s)
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-medium">
+                                  {conversation.title || `Conversation ${conversation.type}`}
+                                </h4>
+                                <Badge variant={getTypeBadgeVariant(conversation.type)}>
+                                  {getTypeLabel(conversation.type)}
+                                </Badge>
+                                {conversation.isOrderConversation && conversation.orders && (
+                                  <Badge variant="outline">
+                                    {formatCurrency(conversation.orders.total_amount)}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-1">
+                                <strong>Participants:</strong> {conversation.participantNames || 'N/A'}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(conversation.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
-                              </p>
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <span>#{conversation.id.slice(0, 8)}</span>
+                                <span>•</span>
+                                <span>{conversation.participantCount || 0} participant(s)</span>
+                                <span>•</span>
+                                <span>{format(new Date(conversation.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}</span>
+                                {conversation.last_message_at && (
+                                  <>
+                                    <span>•</span>
+                                    <span>Dernière activité: {format(new Date(conversation.last_message_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}</span>
+                                  </>
+                                )}
+                              </div>
                             </div>
-                            <Badge variant="outline">{conversation.type}</Badge>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => openConversationDetails(conversation.id)}
+                              >
+                                <Eye className="h-4 w-4" />
+                                Voir
+                              </Button>
+                            </div>
                           </div>
                         </Card>
                       ))}
@@ -671,6 +856,16 @@ export default function SuperAdminDashboard() {
       </main>
 
       <Footer />
+      
+      {/* Dialog pour les détails des conversations */}
+      <ConversationDetailsDialog
+        conversationId={selectedConversationId}
+        isOpen={conversationDialogOpen}
+        onClose={() => {
+          setConversationDialogOpen(false);
+          setSelectedConversationId(null);
+        }}
+      />
     </div>
   );
 }
