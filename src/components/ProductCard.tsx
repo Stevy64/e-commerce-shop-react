@@ -7,8 +7,6 @@ import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import ProductQuickView from "./ProductQuickView";
 
 interface ProductCardProps {
   id?: string;
@@ -19,6 +17,7 @@ interface ProductCardProps {
   discount?: number;
   isNew?: boolean;
   description?: string;
+  onQuickView?: (product: any) => void;
 }
 
 const ProductCard = ({ 
@@ -29,11 +28,11 @@ const ProductCard = ({
   originalPrice, 
   discount, 
   isNew,
-  description 
+  description,
+  onQuickView 
 }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemByProductId } = useWishlist();
-  const [showQuickView, setShowQuickView] = useState(false);
   
   const handleAddToCart = () => {
     if (id) {
@@ -56,24 +55,23 @@ const ProductCard = ({
 
   const inWishlist = id ? isInWishlist(id) : false;
 
-  const product = id ? {
-    id,
-    title,
-    image_url: image,
-    price,
-    original_price: originalPrice,
-    discount,
-    is_new: isNew,
-    description
-  } : null;
+  const handleQuickView = () => {
+    if (onQuickView && id) {
+      const product = {
+        id,
+        title,
+        image_url: image,
+        price,
+        original_price: originalPrice,
+        discount,
+        is_new: isNew,
+        description
+      };
+      onQuickView(product);
+    }
+  };
 
   return (
-    <>
-      <ProductQuickView 
-        product={product}
-        isOpen={showQuickView}
-        onClose={() => setShowQuickView(false)}
-      />
     <Card className="group relative overflow-hidden border-0 shadow-sm hover:shadow-lg transition-shadow duration-300">
       <div className="relative aspect-square overflow-hidden">
         <img
@@ -109,7 +107,7 @@ const ProductCard = ({
             size="icon" 
             variant="secondary" 
             className="h-8 w-8"
-            onClick={() => setShowQuickView(true)}
+            onClick={handleQuickView}
           >
             <Eye className="h-4 w-4" />
           </Button>
@@ -141,7 +139,6 @@ const ProductCard = ({
           </div>
       </CardContent>
     </Card>
-    </>
   );
 };
 

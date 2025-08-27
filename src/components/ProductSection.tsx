@@ -37,33 +37,20 @@ const ProductSection = ({ title, products, viewAllLink, onQuickView }: ProductSe
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => {
-            // Conversion du produit local vers le format attendu par ProductQuickView
-            const productForQuickView = {
-              id: product.id.toString(),
-              title: product.title,
-              image_url: product.image,
-              price: product.price,
-              original_price: product.originalPrice,
-              discount: product.discount,
-              is_new: product.isNew,
-              description: `Découvrez ce magnifique produit : ${product.title}`
-            };
-
-            return (
-              <div key={product.id} onClick={() => onQuickView?.(productForQuickView)}>
-                <ProductCard
-                  id={product.id.toString()}
-                  image={product.image}
-                  title={product.title}
-                  price={product.price}
-                  originalPrice={product.originalPrice}
-                  discount={product.discount}
-                  isNew={product.isNew}
-                />
-              </div>
-            );
-          })}
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              id={product.id.toString()}
+              image={product.image}
+              title={product.title}
+              price={product.price}
+              originalPrice={product.originalPrice}
+              discount={product.discount}
+              isNew={product.isNew}
+              description={`Découvrez ce magnifique produit : ${product.title}`}
+              onQuickView={onQuickView}
+            />
+          ))}
         </div>
       </div>
     </section>
