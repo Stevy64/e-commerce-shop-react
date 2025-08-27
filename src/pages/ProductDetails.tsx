@@ -7,8 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, ShoppingCart, Share2, Star, Minus, Plus } from "lucide-react";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
+/**
+ * Page des détails d'un produit
+ * Récupère l'ID du produit depuis l'URL et affiche les informations complètes
+ */
 const ProductDetails = () => {
+  const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -185,7 +191,8 @@ const ProductDetails = () => {
               </div>
               
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>SKU:</strong> GABOMAZONE-001</p>
+                <p><strong>SKU:</strong> GABOMAZONE-{id ? id.padStart(3, '0') : '001'}</p>
+                <p><strong>ID Produit:</strong> {id || 'Non défini'}</p>
                 <p><strong>Category:</strong> Chairs, Living Room</p>
                 <p><strong>Tags:</strong> Modern, Comfort, Premium</p>
               </div>
