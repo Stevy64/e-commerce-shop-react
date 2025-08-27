@@ -9,6 +9,8 @@ import { Camera, Save } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "./ImageUpload";
+import { AccountManagement } from "./AccountManagement";
 
 const gabonProvinces = {
   "Estuaire": ["Libreville", "Owendo", "Akanda", "Ntoum"],
@@ -118,45 +120,12 @@ const ProfileSettings = () => {
     }
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
-
-    setLoading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      setProfile(prev => ({ ...prev, avatar_url: data.publicUrl }));
-      
-      toast({
-        title: "Succès",
-        description: "Photo de profil mise à jour"
-      });
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de télécharger l'image",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleImageUpload = (url: string) => {
+    setProfile(prev => ({ ...prev, avatar_url: url }));
   };
 
   return (
+    <div className="space-y-6">
     <Card>
       <CardHeader>
         <CardTitle>Informations Personnelles</CardTitle>
@@ -170,19 +139,15 @@ const ProfileSettings = () => {
               {profile.first_name?.[0]}{profile.last_name?.[0]}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <label htmlFor="avatar-upload">
-              <Button variant="outline" className="cursor-pointer" disabled={loading}>
-                <Camera className="h-4 w-4 mr-2" />
-                Changer la photo
-              </Button>
-            </label>
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageUpload}
+          <div className="flex-1 max-w-md">
+            <ImageUpload
+              currentImageUrl={profile.avatar_url}
+              onImageUpload={handleImageUpload}
+              bucket="avatars"
+              folder="profile"
+              maxSizeMB={2}
+              acceptedFormats={["image/png", "image/jpeg", "image/jpg"]}
+              label="Photo de profil"
             />
           </div>
         </div>
@@ -284,6 +249,9 @@ const ProfileSettings = () => {
         </Button>
       </CardContent>
     </Card>
+
+    <AccountManagement />
+    </div>
   );
 };
 

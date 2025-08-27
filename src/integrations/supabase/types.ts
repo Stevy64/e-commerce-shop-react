@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletions: {
+        Row: {
+          deleted_at: string | null
+          deleted_by: string | null
+          deletion_reason: string | null
+          id: string
+          user_data: Json | null
+          user_id: string
+        }
+        Insert: {
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          id?: string
+          user_data?: Json | null
+          user_id: string
+        }
+        Update: {
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          id?: string
+          user_data?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string

@@ -9,6 +9,7 @@ import { Save, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useVendor } from "@/hooks/useVendor";
 import { useToast } from "@/hooks/use-toast";
+import { AccountManagement } from "./AccountManagement";
 
 const businessTypes = [
   { value: "individual", label: "Particulier" },
@@ -70,6 +71,7 @@ export default function VendorProfileForm() {
   };
 
   return (
+    <div className="space-y-6">
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -182,5 +184,8 @@ export default function VendorProfileForm() {
         </form>
       </CardContent>
     </Card>
+
+    <AccountManagement isVendor={true} />
+  </div>
   );
 }
