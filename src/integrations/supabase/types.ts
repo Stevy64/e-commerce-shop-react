@@ -937,6 +937,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      assign_super_admin_to_user: {
+        Args: { target_user_id: string }
+        Returns: Json
+      }
       award_vendor_badges: {
         Args: { vendor_uuid: string }
         Returns: undefined
@@ -952,6 +956,15 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_eligible_users_for_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          user_id: string
+        }[]
       }
       get_vendor_stats: {
         Args: { vendor_uuid: string }
