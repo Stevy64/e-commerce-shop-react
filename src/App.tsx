@@ -19,6 +19,12 @@ import Orders from "./pages/Orders";
 import Wishlist from "./pages/Wishlist";
 import BecomeVendor from "./pages/BecomeVendor";
 import VendorDashboard from "./pages/VendorDashboard";
+import VendorProducts from "./pages/vendor/VendorProducts";
+import VendorProductForm from "./pages/vendor/VendorProductForm";
+import VendorOrders from "./pages/vendor/VendorOrders";
+import VendorMessaging from "./pages/vendor/VendorMessaging";
+import VendorSupport from "./pages/vendor/VendorSupport";
+import VendorGuide from "./pages/vendor/VendorGuide";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -48,8 +54,15 @@ const App = () => (
             <Route path="/orders" element={<Orders />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/become-vendor" element={<BecomeVendor />} />
-        <Route path="/vendor-dashboard" element={<VendorDashboard />} />
-        <Route path="/super-admin" element={<SuperAdminDashboard />} />
+            <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+            <Route path="/vendor/products" element={<VendorProducts />} />
+            <Route path="/vendor/products/new" element={<VendorProductForm />} />
+            <Route path="/vendor/products/edit/:id" element={<VendorProductForm />} />
+            <Route path="/vendor/orders" element={<VendorOrders />} />
+            <Route path="/vendor/messaging" element={<VendorMessaging />} />
+            <Route path="/vendor/support" element={<VendorSupport />} />
+            <Route path="/vendor/guide" element={<VendorGuide />} />
+            <Route path="/super-admin" element={<SuperAdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

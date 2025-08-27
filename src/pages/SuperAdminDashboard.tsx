@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useMessaging } from "@/hooks/useMessaging";
 import { useUserRole } from "@/hooks/useUserRole";
 import { assignSuperAdminRole } from "@/utils/testSuperAdmin";
 import Header from "@/components/Header";
@@ -29,8 +30,15 @@ import {
   Zap,
   Star,
   ShieldCheck,
-  AlertTriangle
+  AlertTriangle,
+  Package,
+  BarChart3,
+  HelpCircle,
+  Trophy,
+  MessageCircle
 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 /**
  * Dashboard Super Admin inspiré des meilleures pratiques
@@ -49,6 +57,7 @@ const SuperAdminDashboard = () => {
     updateVendorCommission,
     updateVendorPlan
   } = useAdmin();
+  const { supportTickets, fetchSupportTickets } = useMessaging();
   const navigate = useNavigate();
 
   const handleBecomeSuperAdmin = async () => {
@@ -225,11 +234,12 @@ const SuperAdminDashboard = () => {
 
         {/* Onglets principaux */}
         <Tabs defaultValue="vendors" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="vendors">Gestion Vendeurs</TabsTrigger>
-            <TabsTrigger value="commissions">Plans & Commissions</TabsTrigger>
-            <TabsTrigger value="analytics">Analytiques</TabsTrigger>
-            <TabsTrigger value="gamification">Gamification</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="vendors">Vendeurs</TabsTrigger>
+            <TabsTrigger value="products">Produits</TabsTrigger>
+            <TabsTrigger value="orders">Commandes</TabsTrigger>
+            <TabsTrigger value="support">Support</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Gestion des vendeurs */}
@@ -342,197 +352,126 @@ const SuperAdminDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Plans et commissions */}
-          <TabsContent value="commissions" className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Plan Basic
-                  </CardTitle>
-                  <CardDescription>Pour les nouveaux vendeurs</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-2xl font-bold">15% Commission</div>
-                  <ul className="space-y-2 text-sm">
-                    <li>• Jusqu'à 50 produits</li>
-                    <li>• Support standard</li>
-                    <li>• Statistiques de base</li>
-                    <li>• Frais de transaction: 2%</li>
-                  </ul>
-                  <Badge variant="outline">Critères: Débutant</Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="w-5 h-5" />
-                    Plan Premium
-                  </CardTitle>
-                  <CardDescription>Pour les vendeurs actifs</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-2xl font-bold">10% Commission</div>
-                  <ul className="space-y-2 text-sm">
-                    <li>• Jusqu'à 200 produits</li>
-                    <li>• Support prioritaire</li>
-                    <li>• Analytiques avancées</li>
-                    <li>• Frais de transaction: 1.5%</li>
-                  </ul>
-                  <Badge variant="secondary">Critères: 10k FCFA + 50 commandes</Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Crown className="w-5 h-5" />
-                    Plan Golden
-                  </CardTitle>
-                  <CardDescription>Pour les top vendeurs</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-2xl font-bold">5% Commission</div>
-                  <ul className="space-y-2 text-sm">
-                    <li>• Produits illimités</li>
-                    <li>• Support VIP 24/7</li>
-                    <li>• Tableau de bord personnalisé</li>
-                    <li>• Frais de transaction: 1%</li>
-                  </ul>
-                  <Badge variant="default">Critères: 50k FCFA + 200 commandes</Badge>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Gestion des produits */}
+          <TabsContent value="products">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Gestion des Produits
+                </CardTitle>
+                <CardDescription>
+                  Vue d'ensemble de tous les produits vendeur
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="font-semibold text-lg mb-2">Interface produits en développement</h3>
+                  <p>La gestion centralisée des produits sera bientôt disponible</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Analytiques */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Évolution mensuelle</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    Graphiques d'évolution à implémenter
-                    <br />
-                    (Revenus, commandes, nouveaux vendeurs)
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Gestion des commandes */}
+          <TabsContent value="orders">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Gestion des Commandes
+                </CardTitle>
+                <CardDescription>
+                  Suivi de toutes les commandes de la plateforme
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="font-semibold text-lg mb-2">Interface commandes en développement</h3>
+                  <p>Le suivi centralisé des commandes sera bientôt disponible</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Vendeurs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {vendors
-                      .sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0))
-                      .slice(0, 5)
-                      .map((vendor, index) => (
-                        <div key={vendor.id} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">#{index + 1}</Badge>
-                            <span className="font-medium">{vendor.business_name}</span>
+          {/* Support tickets */}
+          <TabsContent value="support">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="h-5 w-5" />
+                  Tickets de Support
+                </CardTitle>
+                <CardDescription>
+                  Gestion des demandes support des vendeurs
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {supportTickets.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <HelpCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <h3 className="font-semibold text-lg mb-2">Aucun ticket de support</h3>
+                      <p>Les demandes d'aide des vendeurs apparaîtront ici</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {supportTickets.map((ticket) => (
+                        <Card key={ticket.id} className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{ticket.subject}</h4>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                {ticket.description}
+                              </p>
+                              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                                <span>#{ticket.id.slice(0, 8)}</span>
+                                <span>•</span>
+                                <span>{format(new Date(ticket.created_at), 'dd/MM/yyyy à HH:mm')}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1 ml-4">
+                              <Badge variant={ticket.status === 'open' ? 'destructive' : 'default'}>
+                                {ticket.status === 'open' ? 'Ouvert' : 'Fermé'}
+                              </Badge>
+                              <Badge variant="outline">
+                                {ticket.priority === 'urgent' ? 'Urgent' : 
+                                 ticket.priority === 'high' ? 'Haute' :
+                                 ticket.priority === 'medium' ? 'Moyenne' : 'Faible'}
+                              </Badge>
+                            </div>
                           </div>
-                          <span className="text-sm font-bold">
-                            {vendor.total_sales?.toLocaleString() || 0} FCFA
-                          </span>
-                        </div>
+                        </Card>
                       ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Gamification */}
-          <TabsContent value="gamification" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5" />
-                    Système de badges
-                  </CardTitle>
-                  <CardDescription>
-                    Récompenses pour motiver les vendeurs
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                      <Zap className="w-5 h-5 text-yellow-500" />
-                      <div>
-                        <div className="font-medium">Première Vente</div>
-                        <div className="text-sm text-muted-foreground">Premier produit vendu</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                      <TrendingUp className="w-5 h-5 text-green-500" />
-                      <div>
-                        <div className="font-medium">Top Vendeur</div>
-                        <div className="text-sm text-muted-foreground">Plus de 10k FCFA de ventes</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                      <Crown className="w-5 h-5 text-purple-500" />
-                      <div>
-                        <div className="font-medium">Vendeur Elite</div>
-                        <div className="text-sm text-muted-foreground">Plus de 100k FCFA de ventes</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Score de Performance</CardTitle>
-                  <CardDescription>
-                    Calcul automatique basé sur les ventes, commandes et avis
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Ventes (40%)</span>
-                        <span>40 points max</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Basé sur le volume de ventes mensuel
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Commandes (30%)</span>
-                        <span>30 points max</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Nombre de commandes traitées
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Avis clients (30%)</span>
-                        <span>30 points max</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Note moyenne des avis clients
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Analytics */}
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Analytics Avancées
+                </CardTitle>
+                <CardDescription>
+                  Analyses détaillées de la plateforme
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="font-semibold text-lg mb-2">Analytics avancées en développement</h3>
+                  <p>Les graphiques détaillés et rapports seront bientôt disponibles</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

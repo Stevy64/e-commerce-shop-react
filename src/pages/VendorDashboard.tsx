@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useVendor } from "@/hooks/useVendor";
+import { useProducts } from "@/hooks/useProducts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatPrice } from "@/utils/currency";
+import { Link } from "react-router-dom";
 import { 
   Store, 
   Package, 
@@ -33,6 +36,7 @@ import {
 const VendorDashboard = () => {
   const { user } = useAuth();
   const { vendor, shops, stats, loading, hasVendorProfile, isApprovedVendor } = useVendor();
+  const { products } = useProducts();
   const navigate = useNavigate();
 
   // Redirection si pas connecté
@@ -293,62 +297,93 @@ const VendorDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-4">
-                  <Button variant="outline" className="justify-start">
-                    <Eye className="mr-2 h-4 w-4" />
-                    Guide du vendeur
+                  <Button variant="outline" className="justify-start" asChild>
+                    <Link to="/vendor/guide">
+                      <Eye className="mr-2 h-4 w-4" />
+                      Guide du vendeur
+                    </Link>
                   </Button>
-                  <Button variant="outline" className="justify-start">
-                    <TrendingUp className="mr-2 h-4 w-4" />
-                    Optimiser ses ventes
+                  <Button variant="outline" className="justify-start" asChild>
+                    <Link to="/vendor/messaging">
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      Ma messagerie
+                    </Link>
                   </Button>
-                  <Button variant="outline" className="justify-start">
-                    <Store className="mr-2 h-4 w-4" />
-                    Support vendeur
+                  <Button variant="outline" className="justify-start" asChild>
+                    <Link to="/vendor/support">
+                      <Store className="mr-2 h-4 w-4" />
+                      Support vendeur
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Mes produits */}
           <TabsContent value="products">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Mes produits</CardTitle>
-                  <CardDescription>
-                    Gérez votre catalogue de produits
-                  </CardDescription>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold">Mes Produits</h3>
+                <div className="flex gap-2">
+                  <Button asChild>
+                    <Link to="/vendor/products/new">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nouveau Produit
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link to="/vendor/products">
+                      Voir tous les produits
+                    </Link>
+                  </Button>
                 </div>
-                <Button 
-                  onClick={() => navigate('/vendor/products/new')}
-                  disabled={!isApprovedVendor()}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouveau produit
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {!isApprovedVendor() ? (
-                  <div className="text-center py-8">
-                    <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">
-                      Vous pourrez ajouter des produits une fois votre compte approuvé
+              </div>
+
+              {products.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h4 className="text-lg font-semibold mb-2">Aucun produit ajouté</h4>
+                    <p className="text-muted-foreground text-center mb-4">
+                      Commencez par ajouter vos premiers produits pour démarrer vos ventes
                     </p>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground mb-4">
-                      Vous n'avez pas encore de produits
-                    </p>
-                    <Button onClick={() => navigate('/vendor/products/new')}>
-                      Ajouter votre premier produit
+                    <Button asChild>
+                      <Link to="/vendor/products/new">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter mon premier produit
+                      </Link>
                     </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {products.slice(0, 6).map((product) => (
+                    <Card key={product.id}>
+                      <CardContent className="p-4">
+                        <div className="aspect-square bg-muted rounded-lg mb-3 flex items-center justify-center">
+                          {product.image_url ? (
+                            <img 
+                              src={product.image_url} 
+                              alt={product.title}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            <Package className="h-8 w-8 text-muted-foreground" />
+                          )}
+                        </div>
+                        <h4 className="font-medium line-clamp-2 mb-2">{product.title}</h4>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">{formatPrice(product.price)}</span>
+                          <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
+                            {product.status === 'active' ? 'Actif' : 'Brouillon'}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {/* Mes boutiques */}
