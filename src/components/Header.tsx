@@ -143,12 +143,14 @@ const Header = () => {
             </Button>
 
             {/* Icons */}
-            <Button variant="ghost" size="icon" className="relative hidden sm:flex">
-              <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
-                2
-              </span>
-            </Button>
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon" className="relative hidden sm:flex">
+                <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
+                  2
+                </span>
+              </Button>
+            </Link>
 
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
@@ -170,9 +172,15 @@ const Header = () => {
               <DropdownMenuContent align="end">
                 {user ? (
                   <>
-                    <DropdownMenuItem>Mon Compte</DropdownMenuItem>
-                    <DropdownMenuItem>Commandes</DropdownMenuItem>
-                    <DropdownMenuItem>Liste de Souhaits</DropdownMenuItem>
+                    <Link to="/account">
+                      <DropdownMenuItem>Mon Compte</DropdownMenuItem>
+                    </Link>
+                    <Link to="/orders">
+                      <DropdownMenuItem>Commandes</DropdownMenuItem>
+                    </Link>
+                    <Link to="/wishlist">
+                      <DropdownMenuItem>Liste de Souhaits</DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem onClick={signOut}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Se Déconnecter
@@ -237,14 +245,18 @@ const Header = () => {
                   <div className="border-t pt-4 space-y-2">
                     {user ? (
                       <>
-                        <Button variant="outline" className="w-full justify-start">
-                          <User className="h-4 w-4 mr-2" />
-                          Mon Compte
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start sm:hidden">
-                          <Heart className="h-4 w-4 mr-2" />
-                          Liste de souhaits
-                        </Button>
+                        <Link to="/account">
+                          <Button variant="outline" className="w-full justify-start" onClick={() => setMobileMenuOpen(false)}>
+                            <User className="h-4 w-4 mr-2" />
+                            Mon Compte
+                          </Button>
+                        </Link>
+                        <Link to="/wishlist">
+                          <Button variant="outline" className="w-full justify-start sm:hidden" onClick={() => setMobileMenuOpen(false)}>
+                            <Heart className="h-4 w-4 mr-2" />
+                            Liste de souhaits
+                          </Button>
+                        </Link>
                         <Button variant="outline" className="w-full justify-start" onClick={() => { signOut(); setMobileMenuOpen(false); }}>
                           <LogOut className="h-4 w-4 mr-2" />
                           Se Déconnecter
@@ -264,10 +276,12 @@ const Header = () => {
                             Se connecter
                           </Button>
                         </Link>
-                        <Button variant="outline" className="w-full justify-start sm:hidden">
-                          <Heart className="h-4 w-4 mr-2" />
-                          Liste de souhaits
-                        </Button>
+                        <Link to="/wishlist">
+                          <Button variant="outline" className="w-full justify-start sm:hidden" onClick={() => setMobileMenuOpen(false)}>
+                            <Heart className="h-4 w-4 mr-2" />
+                            Liste de souhaits
+                          </Button>
+                        </Link>
                       </>
                     )}
                   </div>
