@@ -957,6 +957,10 @@ export type Database = {
         Args: { vendor_uuid: string }
         Returns: Json
       }
+      make_me_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       update_vendor_plan: {
         Args: { vendor_uuid: string }
         Returns: Database["public"]["Enums"]["vendor_plan"]
