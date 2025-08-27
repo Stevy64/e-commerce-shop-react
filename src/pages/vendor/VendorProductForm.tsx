@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { Save, ArrowLeft, Package } from "lucide-react";
 
 export default function VendorProductForm() {
-  const { loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
+  const { user, loading: authLoading, isVendor, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
   const { createProduct, updateProduct, getProduct } = useProducts();
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -66,7 +66,7 @@ export default function VendorProductForm() {
     }
   };
 
-  if (authLoading || roleLoading || loading) {
+  if (authLoading || loading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
 
