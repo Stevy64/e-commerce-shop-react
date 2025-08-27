@@ -1,38 +1,51 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Utilitaire pour tester et configurer un Super Admin
- * À utiliser uniquement en développement
+ * Fonction utilitaire pour attribuer le rôle super_admin à l'utilisateur connecté
+ * À utiliser uniquement pour les tests et la configuration initiale
  */
+export const assignSuperAdminRole = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    console.error('Aucun utilisateur connecté');
+    return { success: false, error: 'Aucun utilisateur connecté' };
+  }
 
-export const createTestSuperAdmin = async (userEmail: string) => {
   try {
-    // Récupérer l'utilisateur par email
-    const { data: user } = await supabase.auth.getUser();
-    
-    if (!user.user) {
-      console.error('Aucun utilisateur connecté');
-      return;
-    }
+    // D'abord, supprimer tout autre super admin existant
+    await supabase
+      .from('user_roles')
+      .delete()
+      .eq('role', 'super_admin');
 
-    // Ajouter le rôle super_admin
+    // Ensuite, attribuer le rôle super_admin à l'utilisateur actuel
     const { error } = await supabase
       .from('user_roles')
-      .upsert({
-        user_id: user.user.id,
-        role: 'super_admin'
+      .upsert({ 
+        user_id: user.id, 
+        role: 'super_admin',
+        assigned_by: user.id
       });
 
     if (error) {
-      console.error('Erreur lors de l\'attribution du rôle:', error);
-    } else {
-      console.log('Rôle Super Admin attribué avec succès!');
-      console.log('Vous pouvez maintenant accéder à /super-admin');
+      console.error('Erreur lors de l\'attribution du rôle super admin:', error);
+      return { success: false, error: error.message };
     }
+
+    console.log('Rôle super admin attribué avec succès à:', user.email);
+    return { success: true, userId: user.id };
   } catch (error) {
     console.error('Erreur:', error);
+    return { success: false, error: 'Erreur inattendue' };
   }
 };
 
-// À exécuter dans la console du navigateur si besoin
-// createTestSuperAdmin('votre-email@test.com');
+// Exporter aussi l'ancienne fonction pour compatibilité
+export const createTestSuperAdmin = assignSuperAdminRole;
+
+// Exécuter automatiquement si on est en développement
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+  (window as any).assignSuperAdminRole = assignSuperAdminRole;
+  console.log('Pour devenir super admin, tapez: assignSuperAdminRole()');
+}

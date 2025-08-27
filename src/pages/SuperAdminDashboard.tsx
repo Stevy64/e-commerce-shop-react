@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useUserRole } from "@/hooks/useUserRole";
+import { assignSuperAdminRole } from "@/utils/testSuperAdmin";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -37,37 +39,69 @@ import {
 
 const SuperAdminDashboard = () => {
   const { user } = useAuth();
+  const { isSuperAdmin, loading: roleLoading } = useUserRole();
   const { 
     adminStats, 
     vendors, 
     loading, 
-    isSuperAdmin,
     approveVendor,
     rejectVendor,
     updateVendorCommission,
     updateVendorPlan
   } = useAdmin();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Vérification des droits admin
-  useEffect(() => {
-    const checkAdminRights = async () => {
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-      
-      const adminCheck = await isSuperAdmin();
-      if (!adminCheck) {
-        navigate('/');
-        return;
-      }
-      setIsAdmin(true);
-    };
-    
-    checkAdminRights();
-  }, [user, navigate, isSuperAdmin]);
+  const handleBecomeSuperAdmin = async () => {
+    const result = await assignSuperAdminRole();
+    if (result.success) {
+      window.location.reload(); // Recharger pour mettre à jour le rôle
+    }
+  };
+
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Vérification des permissions...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-foreground mb-4">Accès Refusé</h1>
+            <p className="text-muted-foreground mb-8">Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
+            <div className="space-y-4">
+              <Button onClick={handleBecomeSuperAdmin} variant="outline">
+                Devenir Super Admin (Test)
+              </Button>
+              <div>
+                <Button onClick={() => navigate('/')} variant="default">
+                  Retour à l'accueil
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   // Fonction pour obtenir la couleur du badge selon le plan
   const getPlanBadgeVariant = (plan: string) => {
@@ -96,21 +130,6 @@ const SuperAdminDashboard = () => {
     return 'text-red-600';
   };
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <ShieldCheck className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h1 className="text-2xl font-bold mb-2">Vérification des permissions...</h1>
-            <p className="text-muted-foreground">Nous vérifions vos droits d'accès.</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
