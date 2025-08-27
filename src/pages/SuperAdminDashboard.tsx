@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Store, Package, DollarSign, Crown, Gem, Star, TrendingUp, TrendingDown, Minus, Edit, MessageSquare, Eye, Trash2, Filter } from "lucide-react";
+import { Users, Store, Package, DollarSign, Crown, Gem, Star, TrendingUp, TrendingDown, Minus, Edit, MessageSquare, Eye, Trash2, Filter, Award, Zap } from "lucide-react";
 import ConversationDetailsDialog from "@/components/ConversationDetailsDialog";
 import { formatPrice as formatCurrency } from "@/utils/currency";
 import { assignSuperAdminRole } from "@/utils/testSuperAdmin";
@@ -46,8 +46,11 @@ export default function SuperAdminDashboard() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [conversationDialogOpen, setConversationDialogOpen] = useState(false);
   const [conversationFilter, setConversationFilter] = useState<string>("all");
+  const [badgeDialogOpen, setBadgeDialogOpen] = useState(false);
+  const [selectedVendorForBadge, setSelectedVendorForBadge] = useState<any>(null);
+  const [planUpgradeDialogOpen, setPlanUpgradeDialogOpen] = useState(false);
+  const [selectedVendorForPlan, setSelectedVendorForPlan] = useState<any>(null);
 
-  // Tous les hooks doivent être appelés avant les returns conditionnels
   useEffect(() => {
     if (user && isSuperAdmin) {
       fetchDashboardData();
@@ -194,72 +197,7 @@ export default function SuperAdminDashboard() {
       if (conversationsError) {
         console.error('Erreur conversations:', conversationsError);
       }
-
-      // Récupérer les conversations de commandes - requête simplifiée
-      const { data: orderConversationsData, error: orderConversationsError } = await supabase
-        .from('order_conversations')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (orderConversationsError) {
-        console.error('Erreur order conversations:', orderConversationsError);
-      }
-
-      // Enrichir les conversations de commandes avec des données supplémentaires
-      const enrichedOrderConversations = [];
-      if (orderConversationsData) {
-        for (const oc of orderConversationsData) {
-          // Récupérer les détails de la commande
-          const { data: orderData } = await supabase
-            .from('orders')
-            .select('id, total_amount, status, created_at')
-            .eq('id', oc.order_id)
-            .single();
-
-          // Récupérer les détails du vendeur
-          const { data: vendorData } = await supabase
-            .from('vendors')
-            .select('business_name')
-            .eq('id', oc.vendor_id)
-            .single();
-
-          // Récupérer les détails du client
-          const { data: customerData } = await supabase
-            .from('profiles')
-            .select('display_name, first_name, last_name')
-            .eq('user_id', oc.customer_id)
-            .single();
-
-          enrichedOrderConversations.push({
-            ...oc,
-            type: 'order',
-            title: `Commande #${orderData?.id?.slice(0, 8) || 'N/A'}`,
-            isOrderConversation: true,
-            participantCount: 2,
-            participantNames: `${customerData?.display_name || 'Client'}, ${vendorData?.business_name || 'Vendeur'}`,
-            orders: orderData,
-            vendors: vendorData,
-            profiles: customerData
-          });
-        }
-      }
-      
-      // Combiner toutes les conversations
-      const allConversations = [
-        ...(conversationsData || []).map(conv => ({
-          ...conv,
-          type: conv.type || 'direct',
-          participantCount: conv.conversation_participants?.length || 0,
-          participantNames: conv.conversation_participants?.map((p: any) => 
-            p.profiles?.display_name || 
-            `${p.profiles?.first_name || ''} ${p.profiles?.last_name || ''}`.trim() || 
-            'Utilisateur'
-          ).join(', ') || ''
-        })),
-        ...enrichedOrderConversations
-      ];
-      
-      setConversations(allConversations);
+      setConversations(conversationsData || []);
 
       // Calculer les statistiques
       const { count: usersCount } = await supabase
@@ -303,42 +241,85 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const updateVendorData = async (vendorId: string, updates: any) => {
+  const updateVendorPlan = async (vendorId: string, plan: "basic" | "premium" | "golden") => {
     try {
       const { error } = await supabase
         .from('vendors')
-        .update(updates)
+        .update({ plan })
         .eq('id', vendorId);
 
       if (error) throw error;
 
-      toast.success('Vendeur mis à jour avec succès');
-      setVendorEditDialogOpen(false);
-      setEditingVendor(null);
+      toast.success('Plan mis à jour avec succès');
+      setPlanUpgradeDialogOpen(false);
+      setSelectedVendorForPlan(null);
       fetchDashboardData();
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
-      toast.error('Erreur lors de la mise à jour du vendeur');
+      toast.error('Erreur lors de la mise à jour du plan');
     }
   };
 
-  const updateSupportTicketStatus = async (ticketId: string, status: string) => {
+  const awardBadge = async (vendorId: string, badgeType: string, badgeName: string, description: string) => {
     try {
       const { error } = await supabase
-        .from('support_tickets')
-        .update({ 
-          status,
-          resolved_at: status === 'resolved' ? new Date().toISOString() : null
-        })
-        .eq('id', ticketId);
+        .from('vendor_badges')
+        .insert({
+          vendor_id: vendorId,
+          badge_type: badgeType,
+          badge_name: badgeName,
+          description
+        });
 
       if (error) throw error;
 
-      toast.success('Ticket mis à jour avec succès');
+      toast.success('Badge attribué avec succès');
+      setBadgeDialogOpen(false);
+      setSelectedVendorForBadge(null);
       fetchDashboardData();
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
-      toast.error('Erreur lors de la mise à jour du ticket');
+      console.error('Erreur lors de l\'attribution du badge:', error);
+      toast.error('Erreur lors de l\'attribution du badge');
+    }
+  };
+
+  const createConversation = async (vendorId: string, title: string) => {
+    try {
+      // Créer la conversation
+      const { data: conversation, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          title,
+          type: 'support'
+        })
+        .select()
+        .single();
+
+      if (convError) throw convError;
+
+      // Ajouter les participants
+      const { error: participantsError } = await supabase
+        .from('conversation_participants')
+        .insert([
+          {
+            conversation_id: conversation.id,
+            user_id: user!.id,
+            role: 'admin'
+          },
+          {
+            conversation_id: conversation.id,
+            user_id: vendors.find(v => v.id === vendorId)?.user_id,
+            role: 'participant'
+          }
+        ]);
+
+      if (participantsError) throw participantsError;
+
+      toast.success('Conversation créée avec succès');
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Erreur lors de la création de la conversation:', error);
+      toast.error('Erreur lors de la création de la conversation');
     }
   };
 
@@ -360,34 +341,24 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const getPerformanceColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+  const groupItemsByVendor = (items: any[], vendorKey: string = 'vendor_id') => {
+    const grouped: { [key: string]: any[] } = {};
+    
+    items.forEach(item => {
+      const vendorId = item[vendorKey] || 
+                     (item.products && item.products.vendors?.id) ||
+                     (item.vendors && item.vendors.id);
+      
+      if (!vendorId) return;
+      
+      if (!grouped[vendorId]) {
+        grouped[vendorId] = [];
+      }
+      grouped[vendorId].push(item);
+    });
+    
+    return grouped;
   };
-
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'order': return 'Commande';
-      case 'support': return 'Support';
-      case 'direct': return 'Direct';
-      default: return type;
-    }
-  };
-
-  const getTypeBadgeVariant = (type: string) => {
-    switch (type) {
-      case 'order': return 'default';
-      case 'support': return 'destructive';
-      case 'direct': return 'secondary';
-      default: return 'outline';
-    }
-  };
-
-  const filteredConversations = conversations.filter(conv => {
-    if (conversationFilter === "all") return true;
-    return conv.type === conversationFilter;
-  });
 
   const openConversationDetails = (conversationId: string) => {
     setSelectedConversationId(conversationId);
@@ -476,92 +447,71 @@ export default function SuperAdminDashboard() {
                               {vendor.plan}
                             </Badge>
                           </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                              <div>
-                                <span className="font-medium">Email:</span><br />
-                                {vendor.email || vendor.profiles?.email || 'N/A'}
-                              </div>
-                              <div>
-                                <span className="font-medium">Nom:</span><br />
-                                {vendor.profiles?.display_name || `${vendor.profiles?.first_name || ''} ${vendor.profiles?.last_name || ''}`}
-                              </div>
-                              <div>
-                                <span className="font-medium">Ventes:</span><br />
-                                {formatCurrency(vendor.total_sales || 0)}
-                              </div>
-                              <div>
-                                <span className="font-medium">Commandes:</span><br />
-                                {vendor.total_orders || 0}
-                              </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <span className="font-medium">Email:</span><br />
+                              {vendor.email || 'N/A'}
                             </div>
+                            <div>
+                              <span className="font-medium">Ventes:</span><br />
+                              {formatCurrency(vendor.total_sales || 0)}
+                            </div>
+                            <div>
+                              <span className="font-medium">Commandes:</span><br />
+                              {vendor.total_orders || 0}
+                            </div>
+                            <div>
+                              <span className="font-medium">Performance:</span><br />
+                              {vendor.performance_score || 0}/100
+                            </div>
+                          </div>
                         </div>
                         <div className="flex gap-2">
                           {vendor.status === 'pending' && (
                             <>
-                              <Button size="sm" onClick={() => updateVendorStatus(vendor.id, 'approved')}>
+                              <Button 
+                                variant="default" 
+                                size="sm"
+                                onClick={() => updateVendorStatus(vendor.id, 'approved')}
+                              >
                                 Approuver
                               </Button>
-                              <Button size="sm" variant="destructive" onClick={() => updateVendorStatus(vendor.id, 'rejected')}>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => updateVendorStatus(vendor.id, 'rejected')}
+                              >
                                 Rejeter
                               </Button>
                             </>
                           )}
-                          <Dialog open={vendorEditDialogOpen} onOpenChange={setVendorEditDialogOpen}>
-                            <DialogTrigger asChild>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => setEditingVendor(vendor)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Modifier le vendeur</DialogTitle>
-                              </DialogHeader>
-                              {editingVendor && (
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label htmlFor="business_name">Nom de l'entreprise</Label>
-                                    <Input
-                                      id="business_name"
-                                      defaultValue={editingVendor.business_name}
-                                      onChange={(e) => setEditingVendor({...editingVendor, business_name: e.target.value})}
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="commission_rate">Taux de commission (%)</Label>
-                                    <Input
-                                      id="commission_rate"
-                                      type="number"
-                                      defaultValue={editingVendor.commission_rate}
-                                      onChange={(e) => setEditingVendor({...editingVendor, commission_rate: parseFloat(e.target.value)})}
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="plan">Plan</Label>
-                                    <Select 
-                                      defaultValue={editingVendor.plan}
-                                      onValueChange={(value) => setEditingVendor({...editingVendor, plan: value})}
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="basic">Basic</SelectItem>
-                                        <SelectItem value="premium">Premium</SelectItem>
-                                        <SelectItem value="golden">Golden</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <Button onClick={() => updateVendorData(editingVendor.id, editingVendor)}>
-                                    Sauvegarder
-                                  </Button>
-                                </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedVendorForBadge(vendor);
+                              setBadgeDialogOpen(true);
+                            }}
+                          >
+                            <Award className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedVendorForPlan(vendor);
+                              setPlanUpgradeDialogOpen(true);
+                            }}
+                          >
+                            <Zap className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => createConversation(vendor.id, `Support pour ${vendor.business_name}`)}
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </Card>
@@ -571,151 +521,302 @@ export default function SuperAdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Onglet Produits */}
+          {/* Onglet Produits par Vendeur */}
           <TabsContent value="products">
             <Card>
               <CardHeader>
-                <CardTitle>Tous les Produits</CardTitle>
-                <CardDescription>Gérez tous les produits de la plateforme</CardDescription>
+                <CardTitle>Produits par Vendeur</CardTitle>
+                <CardDescription>Tous les produits organisés par vendeur</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {allProducts.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucun produit trouvé</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {allProducts.slice(0, 12).map((product) => (
-                        <Card key={product.id} className="p-4">
-                          <div className="flex items-start gap-3">
-                            <div className="w-16 h-16 bg-muted rounded flex-shrink-0 flex items-center justify-center">
-                              {product.image_url ? (
-                                <img src={product.image_url} alt={product.title} className="w-full h-full object-cover rounded" />
-                              ) : (
-                                <Package className="h-8 w-8 text-muted-foreground" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium truncate">{product.title}</h4>
-                              <p className="text-sm text-muted-foreground">{product.vendor?.business_name}</p>
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="font-semibold">{formatCurrency(product.price)}</span>
-                                <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
-                                  {product.status}
-                                </Badge>
+                <div className="space-y-6">
+                  {vendors.map((vendor) => {
+                    const vendorProducts = allProducts.filter(p => p.vendor_id === vendor.id);
+                    if (vendorProducts.length === 0) return null;
+                    
+                    return (
+                      <div key={vendor.id} className="border rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <h3 className="text-lg font-semibold">{vendor.business_name}</h3>
+                          <Badge variant={getPlanBadgeVariant(vendor.plan)}>
+                            {vendor.plan}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {vendorProducts.length} produit{vendorProducts.length > 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {vendorProducts.map((product) => (
+                            <Card key={product.id} className="p-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="font-medium">{product.title}</h4>
+                                    <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
+                                      {product.status}
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                    <div>
+                                      <span className="font-medium">Prix:</span><br />
+                                      {formatCurrency(product.price)}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Stock:</span><br />
+                                      {product.stock_quantity || 0}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">SKU:</span><br />
+                                      {product.sku || 'N/A'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button variant="outline" size="sm">
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-2xl">
+                                      <DialogHeader>
+                                        <DialogTitle>Détails du produit</DialogTitle>
+                                      </DialogHeader>
+                                      <div className="space-y-4">
+                                        <div>
+                                          <Label>Titre</Label>
+                                          <div className="p-2 bg-muted rounded">{product.title}</div>
+                                        </div>
+                                        <div>
+                                          <Label>Description</Label>
+                                          <div className="p-2 bg-muted rounded">{product.description || 'Aucune description'}</div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <Label>Prix</Label>
+                                            <div className="p-2 bg-muted rounded">{formatCurrency(product.price)}</div>
+                                          </div>
+                                          <div>
+                                            <Label>Stock</Label>
+                                            <div className="p-2 bg-muted rounded">{product.stock_quantity || 0}</div>
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label>Vendeur</Label>
+                                          <div className="p-2 bg-muted rounded">{vendor.business_name}</div>
+                                        </div>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => createConversation(vendor.id, `Produit: ${product.title}`)}
+                                  >
+                                    <MessageSquare className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Onglet Commandes */}
+          {/* Onglet Commandes par Vendeur */}
           <TabsContent value="orders">
             <Card>
               <CardHeader>
-                <CardTitle>Toutes les Commandes</CardTitle>
-                <CardDescription>Surveillez toutes les commandes de la plateforme</CardDescription>
+                <CardTitle>Commandes par Vendeur</CardTitle>
+                <CardDescription>Toutes les commandes organisées par vendeur</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {allOrders.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucune commande trouvée</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {allOrders.slice(0, 10).map((order) => (
-                        <Card key={order.id} className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">Commande #{order.id.slice(0, 8)}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {order.profiles?.display_name || `${order.profiles?.first_name} ${order.profiles?.last_name}`}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(order.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-semibold">{formatCurrency(order.total_amount)}</div>
-                              <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
-                                {order.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
+                <div className="space-y-6">
+                  {Object.entries(groupItemsByVendor(allOrders)).map(([vendorId, orders]) => {
+                    const vendor = vendors.find(v => v.id === vendorId);
+                    if (!vendor) return null;
+                    
+                    return (
+                      <div key={vendorId} className="border rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <h3 className="text-lg font-semibold">{vendor.business_name}</h3>
+                          <Badge variant={getPlanBadgeVariant(vendor.plan)}>
+                            {vendor.plan}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {orders.length} commande{orders.length > 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {orders.map((order: any) => (
+                            <Card key={order.id} className="p-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="font-medium">Commande #{order.id.slice(0, 8)}</h4>
+                                    <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
+                                      {order.status}
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                    <div>
+                                      <span className="font-medium">Montant:</span><br />
+                                      {formatCurrency(order.total_amount)}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Client:</span><br />
+                                      {order.profiles?.display_name || 'Client'}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Date:</span><br />
+                                      {format(new Date(order.created_at), 'dd/MM/yyyy', { locale: fr })}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button variant="outline" size="sm">
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-2xl">
+                                      <DialogHeader>
+                                        <DialogTitle>Détails de la commande</DialogTitle>
+                                      </DialogHeader>
+                                      <div className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <Label>Numéro</Label>
+                                            <div className="p-2 bg-muted rounded">#{order.id.slice(0, 8)}</div>
+                                          </div>
+                                          <div>
+                                            <Label>Statut</Label>
+                                            <div className="p-2 bg-muted rounded">{order.status}</div>
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label>Client</Label>
+                                          <div className="p-2 bg-muted rounded">{order.profiles?.display_name || 'Client'}</div>
+                                        </div>
+                                        <div>
+                                          <Label>Articles commandés</Label>
+                                          <div className="p-2 bg-muted rounded">
+                                            {order.order_items?.map((item: any, idx: number) => (
+                                              <div key={idx} className="flex justify-between">
+                                                <span>{item.products?.title}</span>
+                                                <span>{item.quantity} x {formatCurrency(item.price)}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label>Total</Label>
+                                          <div className="p-2 bg-muted rounded font-semibold">{formatCurrency(order.total_amount)}</div>
+                                        </div>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => createConversation(vendor.id, `Commande #${order.id.slice(0, 8)}`)}
+                                  >
+                                    <MessageSquare className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Onglet Support */}
+          {/* Onglet Support par Vendeur */}
           <TabsContent value="support">
             <Card>
               <CardHeader>
-                <CardTitle>Tickets de Support</CardTitle>
-                <CardDescription>Gérez les demandes d'aide des vendeurs</CardDescription>
+                <CardTitle>Support par Vendeur</CardTitle>
+                <CardDescription>Tickets de support organisés par vendeur</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {supportTickets.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucun ticket de support</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {supportTickets.map((ticket) => (
-                        <Card key={ticket.id} className="p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-medium">{ticket.subject}</h4>
-                              <p className="text-sm text-muted-foreground line-clamp-2">{ticket.description}</p>
-                              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                                <span>#{ticket.id.slice(0, 8)}</span>
-                                <span>•</span>
-                                <span>{ticket.vendor?.business_name}</span>
-                                <span>•</span>
-                                <span>{format(new Date(ticket.created_at), 'dd/MM/yyyy', { locale: fr })}</span>
+                <div className="space-y-6">
+                  {Object.entries(groupItemsByVendor(supportTickets)).map(([vendorId, tickets]) => {
+                    const vendor = vendors.find(v => v.id === vendorId);
+                    if (!vendor) return null;
+                    
+                    return (
+                      <div key={vendorId} className="border rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <h3 className="text-lg font-semibold">{vendor.business_name}</h3>
+                          <Badge variant={getPlanBadgeVariant(vendor.plan)}>
+                            {vendor.plan}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {tickets.length} ticket{tickets.length > 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {tickets.map((ticket: any) => (
+                            <Card key={ticket.id} className="p-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="font-medium">{ticket.subject}</h4>
+                                    <Badge variant={ticket.status === 'resolved' ? 'default' : 'destructive'}>
+                                      {ticket.status}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                      {ticket.priority}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mb-2">{ticket.description}</p>
+                                  <div className="text-xs text-muted-foreground">
+                                    Créé le {format(new Date(ticket.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Select
+                                    value={ticket.status}
+                                    onValueChange={(value) => {
+                                      // updateSupportTicketStatus function would go here
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-32">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="open">Ouvert</SelectItem>
+                                      <SelectItem value="in_progress">En cours</SelectItem>
+                                      <SelectItem value="resolved">Résolu</SelectItem>
+                                      <SelectItem value="closed">Fermé</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => createConversation(vendor.id, `Support: ${ticket.subject}`)}
+                                  >
+                                    <MessageSquare className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <Badge variant={ticket.status === 'open' ? 'destructive' : 'default'}>
-                                {ticket.status}
-                              </Badge>
-                              <Badge variant="outline">{ticket.priority}</Badge>
-                              <Select
-                                defaultValue={ticket.status}
-                                onValueChange={(value) => updateSupportTicketStatus(ticket.id, value)}
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="open">Ouvert</SelectItem>
-                                  <SelectItem value="in_progress">En cours</SelectItem>
-                                  <SelectItem value="resolved">Résolu</SelectItem>
-                                  <SelectItem value="closed">Fermé</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -725,113 +826,54 @@ export default function SuperAdminDashboard() {
           <TabsContent value="messaging">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Conversations Vendeur/Client</CardTitle>
-                    <CardDescription>Surveillez toutes les communications sur la plateforme</CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    <Select value={conversationFilter} onValueChange={setConversationFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Toutes</SelectItem>
-                        <SelectItem value="order">Commandes</SelectItem>
-                        <SelectItem value="support">Support</SelectItem>
-                        <SelectItem value="direct">Directes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                <CardTitle>Messagerie</CardTitle>
+                <CardDescription>Toutes les conversations de la plateforme</CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4">
+                  <Select value={conversationFilter} onValueChange={setConversationFilter}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les conversations</SelectItem>
+                      <SelectItem value="direct">Conversations directes</SelectItem>
+                      <SelectItem value="order">Conversations de commande</SelectItem>
+                      <SelectItem value="support">Conversations de support</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-4">
-                  {/* Statistiques rapides */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <Card className="p-3">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">{conversations.length}</div>
-                        <div className="text-sm text-muted-foreground">Total</div>
-                      </div>
-                    </Card>
-                    <Card className="p-3">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">{conversations.filter(c => c.type === 'order').length}</div>
-                        <div className="text-sm text-muted-foreground">Commandes</div>
-                      </div>
-                    </Card>
-                    <Card className="p-3">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">{conversations.filter(c => c.type === 'support').length}</div>
-                        <div className="text-sm text-muted-foreground">Support</div>
-                      </div>
-                    </Card>
-                    <Card className="p-3">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">{conversations.filter(c => c.type === 'direct').length}</div>
-                        <div className="text-sm text-muted-foreground">Directes</div>
-                      </div>
-                    </Card>
-                  </div>
-
-                  {filteredConversations.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucune conversation trouvée</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {filteredConversations.slice(0, 15).map((conversation) => (
-                        <Card key={conversation.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h4 className="font-medium">
-                                  {conversation.title || `Conversation ${conversation.type}`}
-                                </h4>
-                                <Badge variant={getTypeBadgeVariant(conversation.type)}>
-                                  {getTypeLabel(conversation.type)}
-                                </Badge>
-                                {conversation.isOrderConversation && conversation.orders && (
-                                  <Badge variant="outline">
-                                    {formatCurrency(conversation.orders.total_amount)}
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-1">
-                                <strong>Participants:</strong> {conversation.participantNames || 'N/A'}
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span>#{conversation.id.slice(0, 8)}</span>
-                                <span>•</span>
-                                <span>{conversation.participantCount || 0} participant(s)</span>
-                                <span>•</span>
-                                <span>{format(new Date(conversation.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}</span>
-                                {conversation.last_message_at && (
-                                  <>
-                                    <span>•</span>
-                                    <span>Dernière activité: {format(new Date(conversation.last_message_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}</span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => openConversationDetails(conversation.id)}
-                              >
-                                <Eye className="h-4 w-4" />
-                                Voir
-                              </Button>
-                            </div>
+                  {conversations.filter(conv => {
+                    if (conversationFilter === "all") return true;
+                    return conv.type === conversationFilter;
+                  }).map((conversation) => (
+                    <Card key={conversation.id} className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold">{conversation.title || 'Conversation'}</h3>
+                            <Badge variant={conversation.type === 'order' ? 'default' : conversation.type === 'support' ? 'destructive' : 'secondary'}>
+                              {conversation.type === 'order' ? 'Commande' : conversation.type === 'support' ? 'Support' : 'Direct'}
+                            </Badge>
                           </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
+                          <div className="text-sm text-muted-foreground">
+                            Participants: {conversation.participantNames || 'N/A'}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Créée le {format(new Date(conversation.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                          </div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openConversationDetails(conversation.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -845,10 +887,11 @@ export default function SuperAdminDashboard() {
                 <CardDescription>Analyses et rapports détaillés</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="font-semibold text-lg mb-2">Analytics avancées</h3>
-                  <p>Les graphiques et rapports détaillés seront disponibles prochainement</p>
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">
+                    Les fonctionnalités d'analyse avancées seront disponibles prochainement.
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -856,9 +899,75 @@ export default function SuperAdminDashboard() {
         </Tabs>
       </main>
 
-      <Footer />
-      
-      {/* Dialog pour les détails des conversations */}
+      {/* Dialog pour attribution de badges */}
+      <Dialog open={badgeDialogOpen} onOpenChange={setBadgeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Attribuer un badge</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Vendeur</Label>
+              <div className="p-2 bg-muted rounded">{selectedVendorForBadge?.business_name}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button onClick={() => awardBadge(selectedVendorForBadge?.id, 'top_seller', 'Top Vendeur', 'Badge pour les meilleurs vendeurs')}>
+                Top Vendeur
+              </Button>
+              <Button onClick={() => awardBadge(selectedVendorForBadge?.id, 'quality', 'Qualité Premium', 'Badge pour la qualité des produits')}>
+                Qualité Premium
+              </Button>
+              <Button onClick={() => awardBadge(selectedVendorForBadge?.id, 'customer_service', 'Service Client', 'Excellence en service client')}>
+                Service Client
+              </Button>
+              <Button onClick={() => awardBadge(selectedVendorForBadge?.id, 'innovation', 'Innovation', 'Badge pour l\'innovation')}>
+                Innovation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog pour upgrade de plan */}
+      <Dialog open={planUpgradeDialogOpen} onOpenChange={setPlanUpgradeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le plan d'abonnement</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Vendeur</Label>
+              <div className="p-2 bg-muted rounded">{selectedVendorForPlan?.business_name}</div>
+            </div>
+            <div>
+              <Label>Plan actuel</Label>
+              <div className="p-2 bg-muted rounded">{selectedVendorForPlan?.plan}</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Button 
+                variant={selectedVendorForPlan?.plan === 'basic' ? 'default' : 'outline'}
+                onClick={() => updateVendorPlan(selectedVendorForPlan?.id, 'basic')}
+              >
+                Basic
+              </Button>
+              <Button 
+                variant={selectedVendorForPlan?.plan === 'premium' ? 'default' : 'outline'}
+                onClick={() => updateVendorPlan(selectedVendorForPlan?.id, 'premium')}
+              >
+                Premium
+              </Button>
+              <Button 
+                variant={selectedVendorForPlan?.plan === 'golden' ? 'default' : 'outline'}
+                onClick={() => updateVendorPlan(selectedVendorForPlan?.id, 'golden')}
+              >
+                Golden
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog des détails de conversation */}
       <ConversationDetailsDialog
         conversationId={selectedConversationId}
         isOpen={conversationDialogOpen}
@@ -867,6 +976,8 @@ export default function SuperAdminDashboard() {
           setSelectedConversationId(null);
         }}
       />
+
+      <Footer />
     </div>
   );
 }
