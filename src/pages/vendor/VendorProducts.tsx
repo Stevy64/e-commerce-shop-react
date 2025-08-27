@@ -3,16 +3,16 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useVendorAuth } from "@/hooks/useVendorAuth";
 import { useProducts } from "@/hooks/useProducts";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Search, Edit, Trash2, Eye, Package } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye, Package, ArrowLeft } from "lucide-react";
 import { formatPrice as formatCurrency } from "@/utils/currency";
-import { Link } from "react-router-dom";
+import ProductDetails from "@/components/ProductDetails";
 
 export default function VendorProducts() {
   const { loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
@@ -20,6 +20,9 @@ export default function VendorProducts() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [productDetailsOpen, setProductDetailsOpen] = useState(false);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
@@ -41,8 +44,22 @@ export default function VendorProducts() {
     return matchesSearch && matchesStatus;
   });
 
+  const handleViewProduct = (product: any) => {
+    setSelectedProduct(product);
+    setProductDetailsOpen(true);
+  };
+
+  const handleEditProduct = (productId: string) => {
+    navigate(`/vendor/products/edit/${productId}`);
+  };
+
   const handleDeleteProduct = async (productId: string) => {
-    await deleteProduct(productId);
+    setDeleteLoading(true);
+    try {
+      await deleteProduct(productId);
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -67,7 +84,8 @@ export default function VendorProducts() {
           <div className="flex items-center gap-4 mb-4">
             <Button variant="outline" asChild>
               <Link to="/vendor-dashboard">
-                ← Retour au Dashboard
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour au Dashboard
               </Link>
             </Button>
           </div>
@@ -211,7 +229,7 @@ export default function VendorProducts() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => navigate(`/product/${product.id}`)}
+                      onClick={() => handleViewProduct(product)}
                     >
                       <Eye className="h-4 w-4 mr-1" />
                       Voir
@@ -220,14 +238,14 @@ export default function VendorProducts() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => navigate(`/vendor/products/edit/${product.id}`)}
+                      onClick={() => handleEditProduct(product.id)}
                     >
                       <Edit className="h-4 w-4 mr-1" />
                       Modifier
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" disabled={deleteLoading}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -256,6 +274,16 @@ export default function VendorProducts() {
             ))}
           </div>
         )}
+
+        <ProductDetails
+          product={selectedProduct}
+          isOpen={productDetailsOpen}
+          onClose={() => {
+            setProductDetailsOpen(false);
+            setSelectedProduct(null);
+          }}
+          onEdit={handleEditProduct}
+        />
       </main>
 
       <Footer />

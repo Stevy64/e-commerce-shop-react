@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useVendorAuth } from "@/hooks/useVendorAuth";
@@ -27,7 +27,7 @@ interface SupportFormData {
 }
 
 export default function VendorSupport() {
-  const { user, loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
+  const { user, loading, isVendor, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
   const { getVendorId } = useVendor();
   const { supportTickets, loading: messagingLoading, createSupportTicket, fetchSupportTickets } = useMessaging();
   const [formData, setFormData] = useState<SupportFormData>({
@@ -38,7 +38,13 @@ export default function VendorSupport() {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Note: Nous chargerons les tickets via un effet une fois que nous aurons l'ID vendeur
+  // Load support tickets for current vendor
+  useEffect(() => {
+    const vendorId = getVendorId();
+    if (user && isVendor && vendorId) {
+      fetchSupportTickets(vendorId);
+    }
+  }, [user, isVendor, fetchSupportTickets, getVendorId]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
@@ -88,7 +94,11 @@ export default function VendorSupport() {
         channel: 'message'
       });
       
-      // Note: Refresh sera implémenté avec l'ID vendeur approprié
+      // Refresh support tickets
+      const currentVendorId = getVendorId();
+      if (currentVendorId) {
+        await fetchSupportTickets(currentVendorId);
+      }
     } finally {
       setSubmitting(false);
     }
