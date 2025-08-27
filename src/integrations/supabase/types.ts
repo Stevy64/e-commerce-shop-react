@@ -161,6 +161,48 @@ export type Database = {
           },
         ]
       }
+      order_conversations: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          id: string
+          order_id: string
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          id?: string
+          order_id: string
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          id?: string
+          order_id?: string
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_conversations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_conversations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -211,6 +253,7 @@ export type Database = {
           total_amount: number
           updated_at: string
           user_id: string
+          vendor_id: string | null
         }
         Insert: {
           created_at?: string
@@ -219,6 +262,7 @@ export type Database = {
           total_amount: number
           updated_at?: string
           user_id: string
+          vendor_id?: string | null
         }
         Update: {
           created_at?: string
@@ -227,6 +271,7 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           user_id?: string
+          vendor_id?: string | null
         }
         Relationships: []
       }

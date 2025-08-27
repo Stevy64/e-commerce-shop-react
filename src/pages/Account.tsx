@@ -9,11 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Mail, Phone, MapPin, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useVendor } from "@/hooks/useVendor";
 import { Link, Navigate } from "react-router-dom";
 import ProfileSettings from "@/components/ProfileSettings";
+import VendorProfileForm from "@/components/VendorProfileForm";
 
 const Account = () => {
   const { user, signOut } = useAuth();
+  const { hasVendorProfile } = useVendor();
   const [displayName, setDisplayName] = useState(user?.user_metadata?.display_name || "");
   const [email, setEmail] = useState(user?.email || "");
 
@@ -86,12 +89,23 @@ const Account = () => {
               <Tabs defaultValue="profile" className="space-y-6">
                 <TabsList>
                   <TabsTrigger value="profile">Informations Personnelles</TabsTrigger>
+                  {hasVendorProfile() && (
+                    <TabsTrigger value="vendor">Profil Vendeur</TabsTrigger>
+                  )}
                   <TabsTrigger value="security">Sécurité</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="profile">
-                  <ProfileSettings />
+                  <div className="space-y-6">
+                    <ProfileSettings />
+                  </div>
                 </TabsContent>
+
+                {hasVendorProfile() && (
+                  <TabsContent value="vendor">
+                    <VendorProfileForm />
+                  </TabsContent>
+                )}
 
                 <TabsContent value="security">
                   <Card>

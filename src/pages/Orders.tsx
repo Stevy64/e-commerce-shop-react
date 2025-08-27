@@ -2,16 +2,18 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import OrderDetails from "@/components/OrderDetails";
+import OrderMessaging from "@/components/OrderMessaging";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Eye, Download, ArrowLeft, X, Info } from "lucide-react";
+import { Package, Eye, Download, ArrowLeft, X, Info, MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/utils/currency";
 import { downloadInvoice } from "@/utils/pdfGenerator";
 import { Link, Navigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface Order {
   id: string;
@@ -33,10 +35,12 @@ interface Order {
 
 const Orders = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showMessaging, setShowMessaging] = useState(false);
 
   if (!user) {
     return <Navigate to="/auth" replace />;
@@ -165,10 +169,34 @@ const Orders = () => {
    * @param orderId - ID de la commande à annuler
    */
   const cancelOrder = async (orderId: string) => {
-    // Ici on pourrait ajouter une logique pour annuler la commande dans la base de données
-    console.log('Annulation de la commande:', orderId);
-    // Pour l'instant, on montre juste un message
-    alert('Fonctionnalité d\'annulation en cours de développement');
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'cancelled' })
+        .eq('id', orderId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      // Mettre à jour la liste des commandes
+      setOrders(orders.map(order => 
+        order.id === orderId 
+          ? { ...order, status: 'cancelled' }
+          : order
+      ));
+
+      toast({
+        title: "Commande annulée",
+        description: "Votre commande a été annulée avec succès"
+      });
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'annuler la commande",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -268,6 +296,17 @@ const Orders = () => {
                           <Download className="h-4 w-4 mr-2" />
                           Facture PDF
                         </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setShowMessaging(true);
+                          }}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Messages
+                        </Button>
                         {canCancelOrder(order.status) && (
                           <Button 
                             variant="destructive" 
@@ -313,6 +352,12 @@ const Orders = () => {
         order={selectedOrder}
         isOpen={showOrderDetails}
         onClose={() => setShowOrderDetails(false)}
+      />
+
+      <OrderMessaging 
+        order={selectedOrder}
+        isOpen={showMessaging}
+        onClose={() => setShowMessaging(false)}
       />
 
       <Footer />
