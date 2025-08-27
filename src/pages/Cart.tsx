@@ -118,7 +118,9 @@ const Cart = () => {
                           className="w-20 h-20 object-cover rounded-lg"
                         />
                         <div>
-                          <h3 className="font-semibold text-foreground">{item.products.title}</h3>
+                          <Link to={`/product/${item.product_id}`}>
+                            <h3 className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">{item.products.title}</h3>
+                          </Link>
                           <p className="text-lg font-bold text-primary">{formatPrice(item.products.price)}</p>
                         </div>
                       </div>

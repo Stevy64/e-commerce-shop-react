@@ -73,6 +73,7 @@ const Wishlist = () => {
                   price={item.products.price}
                   originalPrice={item.products.original_price}
                   discount={item.products.discount}
+                  description={item.products.description}
                 />
               ))}
             </div>
