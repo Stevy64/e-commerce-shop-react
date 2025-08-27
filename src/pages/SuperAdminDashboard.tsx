@@ -47,6 +47,13 @@ export default function SuperAdminDashboard() {
   const [conversationDialogOpen, setConversationDialogOpen] = useState(false);
   const [conversationFilter, setConversationFilter] = useState<string>("all");
 
+  // Tous les hooks doivent être appelés avant les returns conditionnels
+  useEffect(() => {
+    if (user && isSuperAdmin) {
+      fetchDashboardData();
+    }
+  }, [user, isSuperAdmin]);
+
   if (authLoading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
@@ -81,12 +88,6 @@ export default function SuperAdminDashboard() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (user && isSuperAdmin) {
-      fetchDashboardData();
-    }
-  }, [user, isSuperAdmin]);
 
   const fetchDashboardData = async () => {
     try {
