@@ -5,10 +5,12 @@ import OrderDetails from "@/components/OrderDetails";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Eye, Download, ArrowLeft } from "lucide-react";
+import { Package, Eye, Download, ArrowLeft, X, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/utils/currency";
+import { downloadInvoice } from "@/utils/pdfGenerator";
 import { Link, Navigate } from "react-router-dom";
 
 interface Order {
@@ -75,13 +77,18 @@ const Orders = () => {
     fetchOrders();
   }, [user]);
 
+  /**
+   * Retourne la couleur du badge selon le statut de la commande
+   * @param status - Statut de la commande
+   * @returns Classes CSS pour le styling du badge
+   */
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'confirmed':
         return 'bg-blue-100 text-blue-800';
-      case 'shipped':
+      case 'shipping':
         return 'bg-purple-100 text-purple-800';
       case 'delivered':
         return 'bg-green-100 text-green-800';
@@ -92,14 +99,19 @@ const Orders = () => {
     }
   };
 
+  /**
+   * Retourne le texte français du statut
+   * @param status - Statut de la commande
+   * @returns Texte français du statut
+   */
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'En attente';
+        return 'En attente de validation';
       case 'confirmed':
-        return 'Confirmée';
-      case 'shipped':
-        return 'Expédiée';
+        return 'Validée';
+      case 'shipping':
+        return 'En cours de livraison';
       case 'delivered':
         return 'Livrée';
       case 'cancelled':
@@ -107,6 +119,56 @@ const Orders = () => {
       default:
         return status;
     }
+  };
+
+  /**
+   * Retourne la description du statut pour le tooltip
+   * @param status - Statut de la commande
+   * @returns Description du statut
+   */
+  const getStatusDescription = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Votre commande est en attente de validation par notre équipe';
+      case 'confirmed':
+        return 'Votre commande a été confirmée et est en cours de préparation';
+      case 'shipping':
+        return 'Votre commande est en cours de livraison';
+      case 'delivered':
+        return 'Votre commande a été livrée avec succès';
+      case 'cancelled':
+        return 'Cette commande a été annulée';
+      default:
+        return 'Statut inconnu';
+    }
+  };
+
+  /**
+   * Vérifie si une commande peut être annulée
+   * @param status - Statut de la commande
+   * @returns true si la commande peut être annulée
+   */
+  const canCancelOrder = (status: string) => {
+    return status === 'pending' || status === 'confirmed';
+  };
+
+  /**
+   * Génère et télécharge une facture PDF (utilise l'utilitaire dédié)
+   * @param order - Commande pour laquelle générer la facture
+   */
+  const downloadInvoicePDF = (order: Order) => {
+    downloadInvoice(order);
+  };
+
+  /**
+   * Annule une commande
+   * @param orderId - ID de la commande à annuler
+   */
+  const cancelOrder = async (orderId: string) => {
+    // Ici on pourrait ajouter une logique pour annuler la commande dans la base de données
+    console.log('Annulation de la commande:', orderId);
+    // Pour l'instant, on montre juste un message
+    alert('Fonctionnalité d\'annulation en cours de développement');
   };
 
   return (
@@ -162,9 +224,21 @@ const Orders = () => {
                       <div className="space-y-2 mb-4 lg:mb-0">
                         <div className="flex items-center space-x-4">
                           <h3 className="text-xl font-semibold">Commande #{order.id.slice(0, 8)}</h3>
-                          <Badge className={getStatusColor(order.status)}>
-                            {getStatusText(order.status)}
-                          </Badge>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center space-x-2">
+                                  <Badge className={getStatusColor(order.status)}>
+                                    {getStatusText(order.status)}
+                                  </Badge>
+                                  <Info className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{getStatusDescription(order.status)}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                         <p className="text-muted-foreground">
                           Passée le {new Date(order.created_at).toLocaleDateString('fr-FR')}
@@ -174,7 +248,7 @@ const Orders = () => {
                         </p>
                       </div>
                       
-                       <div className="flex space-x-2">
+                       <div className="flex flex-wrap gap-2">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -186,10 +260,24 @@ const Orders = () => {
                           <Eye className="h-4 w-4 mr-2" />
                           Détails
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => downloadInvoicePDF(order)}
+                        >
                           <Download className="h-4 w-4 mr-2" />
-                          Facture
+                          Facture PDF
                         </Button>
+                        {canCancelOrder(order.status) && (
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => cancelOrder(order.id)}
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            Annuler
+                          </Button>
+                        )}
                       </div>
                     </div>
 

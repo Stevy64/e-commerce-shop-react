@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -14,24 +15,28 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-          Découvrez des
-          <span className="block text-accent">Tendances Mode Incroyables</span>
+          Bienvenue sur
+          <span className="block text-accent">Gabomazone votre boutique en ligne</span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
-          Explorez notre collection soigneusement sélectionnée d'articles de mode premium qui définissent votre style unique
+          Explorez notre collection soigneusement sélectionnée d'articles de nos meilleures boutiques locales
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-6 text-lg">
-            Acheter Maintenant
-          </Button>
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg"
-          >
-            Voir Détails
-          </Button>
+          <Link to="/shop">
+            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-6 text-lg">
+              Acheter Maintenant
+            </Button>
+          </Link>
+          <Link to="/auth">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg"
+            >
+              Se connecter
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

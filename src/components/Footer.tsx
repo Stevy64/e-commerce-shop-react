@@ -10,10 +10,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-2xl font-bold text-primary mb-4">Addina</h3>
+            <h3 className="text-2xl font-bold text-primary mb-4">Gabomazone</h3>
             <p className="text-muted-foreground mb-4">
-              Your trusted partner for premium fashion and lifestyle products. 
-              We bring you the latest trends at unbeatable prices.
+              Votre partenaire de confiance pour des produits de mode et de style de vie premium. 
+              Nous vous apportons les dernières tendances de nos meilleures boutiques locales.
             </p>
             <div className="flex space-x-3">
               <Button variant="outline" size="icon">
@@ -75,9 +75,9 @@ const Footer = () => {
             <div className="mt-4">
               <h5 className="font-medium text-foreground mb-2">Contact Info</h5>
               <p className="text-sm text-muted-foreground">
-                Email: support@addina.com<br />
-                Phone: +1 (555) 123-4567<br />
-                Address: 123 Fashion Street, NY 10001
+                Email: support@gabomazone.ga<br />
+                Téléphone: +241 XX XX XX XX<br />
+                Adresse: Libreville, Gabon
               </p>
             </div>
           </div>
@@ -87,7 +87,7 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 Addina. All rights reserved.
+            © 2024 Gabomazone. Tous droits réservés.
           </p>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <img src="https://via.placeholder.com/40x25?text=VISA" alt="Visa" className="h-6" />

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ProductSection from "@/components/ProductSection";
@@ -5,6 +6,7 @@ import BenefitsSection from "@/components/BenefitsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import BlogSection from "@/components/BlogSection";
 import Footer from "@/components/Footer";
+import ProductQuickView from "@/components/ProductQuickView";
 
 /**
  * Données d'exemple des produits
@@ -111,17 +113,56 @@ const dealsOfTheWeek = [
   }
 ];
 
+/**
+ * Page d'accueil de Gabomazone
+ * Affiche les sections principales : Hero, produits, avantages, témoignages et blog
+ */
 const Index = () => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showQuickView, setShowQuickView] = useState(false);
+
+  /**
+   * Ouvre la vue rapide d'un produit
+   * @param product - Le produit à afficher dans la vue rapide
+   */
+  const handleQuickView = (product) => {
+    setSelectedProduct(product);
+    setShowQuickView(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <ProductSection title="Nouveautés" products={newArrivals} viewAllLink="/nouveautes" />
-      <ProductSection title="Produits Vedettes" products={featuredProducts} viewAllLink="/vedettes" />
+      <ProductSection 
+        title="Nouveautés" 
+        products={newArrivals} 
+        viewAllLink="/nouveautes" 
+        onQuickView={handleQuickView}
+      />
+      <ProductSection 
+        title="Produits Vedettes" 
+        products={featuredProducts} 
+        viewAllLink="/vedettes" 
+        onQuickView={handleQuickView}
+      />
       <BenefitsSection />
-      <ProductSection title="Offres de la Semaine" products={dealsOfTheWeek} viewAllLink="/offres" />
+      <ProductSection 
+        title="Offres de la Semaine" 
+        products={dealsOfTheWeek} 
+        viewAllLink="/offres" 
+        onQuickView={handleQuickView}
+      />
       <TestimonialsSection />
       <BlogSection />
+      
+      {/* Vue rapide des produits */}
+      <ProductQuickView 
+        product={selectedProduct}
+        isOpen={showQuickView}
+        onClose={() => setShowQuickView(false)}
+      />
+      
       <Footer />
     </div>
   );

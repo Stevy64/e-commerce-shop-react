@@ -185,7 +185,7 @@ const ProductDetails = () => {
               </div>
               
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>SKU:</strong> ADDINA-001</p>
+                <p><strong>SKU:</strong> GABOMAZONE-001</p>
                 <p><strong>Category:</strong> Chairs, Living Room</p>
                 <p><strong>Tags:</strong> Modern, Comfort, Premium</p>
               </div>

@@ -82,7 +82,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary mr-2"></div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">ADDINA</h1>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">GABOMAZONE</h1>
           </Link>
 
           {/* Navigation Menu */}

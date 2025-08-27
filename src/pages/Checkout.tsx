@@ -29,9 +29,8 @@ const Checkout = () => {
     phone: "",
     address: "",
     city: "",
-    postalCode: "",
-    country: "",
-    paymentMethod: "card"
+    province: "",
+    paymentMethod: "airtel_money"
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -223,7 +222,7 @@ const Checkout = () => {
                         required
                       />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="city">Ville *</Label>
                         <Input
@@ -234,25 +233,21 @@ const Checkout = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="postalCode">Code postal *</Label>
-                        <Input
-                          id="postalCode"
-                          value={formData.postalCode}
-                          onChange={(e) => handleInputChange('postalCode', e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="country">Pays *</Label>
-                        <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
+                        <Label htmlFor="province">Province *</Label>
+                        <Select value={formData.province} onValueChange={(value) => handleInputChange('province', value)}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un pays" />
+                            <SelectValue placeholder="Sélectionner une province" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="france">France</SelectItem>
-                            <SelectItem value="belgium">Belgique</SelectItem>
-                            <SelectItem value="switzerland">Suisse</SelectItem>
-                            <SelectItem value="canada">Canada</SelectItem>
+                            <SelectItem value="estuaire">Estuaire</SelectItem>
+                            <SelectItem value="haut-ogooue">Haut-Ogooué</SelectItem>
+                            <SelectItem value="moyen-ogooue">Moyen-Ogooué</SelectItem>
+                            <SelectItem value="ngounie">Ngounié</SelectItem>
+                            <SelectItem value="nyanga">Nyanga</SelectItem>
+                            <SelectItem value="ogooue-ivindo">Ogooué-Ivindo</SelectItem>
+                            <SelectItem value="ogooue-lolo">Ogooué-Lolo</SelectItem>
+                            <SelectItem value="ogooue-maritime">Ogooué-Maritime</SelectItem>
+                            <SelectItem value="woleu-ntem">Woleu-Ntem</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -269,30 +264,66 @@ const Checkout = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="card" checked={formData.paymentMethod === 'card'} />
-                      <Label htmlFor="card">Carte de crédit</Label>
+                    {/* Options de paiement mobile money et autres */}
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="airtel_money" 
+                          checked={formData.paymentMethod === 'airtel_money'} 
+                          onCheckedChange={() => handleInputChange('paymentMethod', 'airtel_money')}
+                        />
+                        <Label htmlFor="airtel_money" className="flex items-center">
+                          <span className="ml-2">Airtel Money</span>
+                        </Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="moov_money" 
+                          checked={formData.paymentMethod === 'moov_money'} 
+                          onCheckedChange={() => handleInputChange('paymentMethod', 'moov_money')}
+                        />
+                        <Label htmlFor="moov_money" className="flex items-center">
+                          <span className="ml-2">Moov Money</span>
+                        </Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="cash_on_delivery" 
+                          checked={formData.paymentMethod === 'cash_on_delivery'} 
+                          onCheckedChange={() => handleInputChange('paymentMethod', 'cash_on_delivery')}
+                        />
+                        <Label htmlFor="cash_on_delivery" className="flex items-center">
+                          <span className="ml-2">Paiement à la livraison</span>
+                        </Label>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <Label htmlFor="cardNumber">Numéro de carte *</Label>
-                        <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
+
+                    {/* Informations supplémentaires pour Mobile Money */}
+                    {(formData.paymentMethod === 'airtel_money' || formData.paymentMethod === 'moov_money') && (
+                      <div className="mt-4 p-4 bg-muted rounded-lg">
+                        <Label htmlFor="mobileNumber">Numéro de téléphone *</Label>
+                        <Input 
+                          id="mobileNumber" 
+                          placeholder="+241 XX XX XX XX" 
+                          className="mt-2"
+                        />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Vous recevrez une notification de paiement sur ce numéro
+                        </p>
                       </div>
-                      <div>
-                        <Label htmlFor="expiryDate">Date d'expiration *</Label>
-                        <Input id="expiryDate" placeholder="MM/AA" />
+                    )}
+
+                    {/* Information pour paiement à la livraison */}
+                    {formData.paymentMethod === 'cash_on_delivery' && (
+                      <div className="mt-4 p-4 bg-muted rounded-lg">
+                        <p className="text-sm text-muted-foreground">
+                          Vous paierez en espèces lors de la livraison de votre commande.
+                        </p>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="cvv">CVV *</Label>
-                        <Input id="cvv" placeholder="123" />
-                      </div>
-                      <div>
-                        <Label htmlFor="cardName">Nom sur la carte *</Label>
-                        <Input id="cardName" placeholder="Jean Dupont" />
-                      </div>
-                    </div>
+                    )}
+
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Lock className="mr-2 h-4 w-4" />
                       Vos informations de paiement sont sécurisées
