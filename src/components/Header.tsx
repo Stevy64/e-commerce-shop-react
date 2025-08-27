@@ -127,11 +127,16 @@ const Header = () => {
                   Blog
                 </Link>
               </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/contact" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                  Contact
-                </Link>
-              </NavigationMenuItem>
+               <NavigationMenuItem>
+                 <Link to="/contact" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                   Contact
+                 </Link>
+               </NavigationMenuItem>
+               <NavigationMenuItem>
+                 <Link to="/become-vendor" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                   Devenir Vendeur
+                 </Link>
+               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -252,9 +257,12 @@ const Header = () => {
                     <Link to="/blog" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
                       Blog
                     </Link>
-                    <Link to="/contact" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
-                      Contact
-                    </Link>
+                     <Link to="/contact" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                       Contact
+                     </Link>
+                     <Link to="/become-vendor" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                       Devenir Vendeur
+                     </Link>
                   </div>
 
                   {/* Mobile User Actions */}

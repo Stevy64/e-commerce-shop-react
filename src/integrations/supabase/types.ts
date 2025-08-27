@@ -118,44 +118,160 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          parent_id: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          parent_id?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          parent_id?: string | null
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_category_mappings: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          id: string
+          product_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          id?: string
+          product_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_category_mappings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_category_mappings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           created_at: string
           description: string | null
+          dimensions: Json | null
           discount: number | null
           id: string
           image_url: string | null
           is_new: boolean | null
           original_price: number | null
           price: number
+          shipping_info: Json | null
+          shop_id: string | null
+          sku: string | null
+          status: string | null
+          stock_quantity: number | null
           title: string
           updated_at: string
+          vendor_id: string | null
+          weight: number | null
         }
         Insert: {
           created_at?: string
           description?: string | null
+          dimensions?: Json | null
           discount?: number | null
           id?: string
           image_url?: string | null
           is_new?: boolean | null
           original_price?: number | null
           price: number
+          shipping_info?: Json | null
+          shop_id?: string | null
+          sku?: string | null
+          status?: string | null
+          stock_quantity?: number | null
           title: string
           updated_at?: string
+          vendor_id?: string | null
+          weight?: number | null
         }
         Update: {
           created_at?: string
           description?: string | null
+          dimensions?: Json | null
           discount?: number | null
           id?: string
           image_url?: string | null
           is_new?: boolean | null
           original_price?: number | null
           price?: number
+          shipping_info?: Json | null
+          shop_id?: string | null
+          sku?: string | null
+          status?: string | null
+          stock_quantity?: number | null
           title?: string
           updated_at?: string
+          vendor_id?: string | null
+          weight?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -202,6 +318,202 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_notifications_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          order_id: string | null
+          rating: number
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating: number
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating?: number
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_shops: {
+        Row: {
+          address: string | null
+          banner_url: string | null
+          city: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          postal_code: string | null
+          province: string | null
+          shop_description: string | null
+          shop_name: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          address?: string | null
+          banner_url?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          postal_code?: string | null
+          province?: string | null
+          shop_description?: string | null
+          shop_name: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          address?: string | null
+          banner_url?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          postal_code?: string | null
+          province?: string | null
+          shop_description?: string | null
+          shop_name?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_shops_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          approved_at: string | null
+          business_description: string | null
+          business_name: string
+          business_registration_number: string | null
+          business_type: string | null
+          commission_rate: number | null
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+          status: string | null
+          tax_number: string | null
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          business_description?: string | null
+          business_name: string
+          business_registration_number?: string | null
+          business_type?: string | null
+          commission_rate?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          status?: string | null
+          tax_number?: string | null
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          business_description?: string | null
+          business_name?: string
+          business_registration_number?: string | null
+          business_type?: string | null
+          commission_rate?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          status?: string | null
+          tax_number?: string | null
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       wishlist_items: {
         Row: {
           created_at: string
@@ -236,7 +548,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_sku: {
+        Args: { product_title: string; vendor_uuid: string }
+        Returns: string
+      }
+      get_vendor_stats: {
+        Args: { vendor_uuid: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
