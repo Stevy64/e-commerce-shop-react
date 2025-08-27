@@ -122,19 +122,19 @@ const Header = () => {
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/blog" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                  Blog
-                </Link>
-              </NavigationMenuItem>
                <NavigationMenuItem>
                  <Link to="/contact" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
                    Contact
                  </Link>
                </NavigationMenuItem>
                <NavigationMenuItem>
-                 <Link to="/become-vendor" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                   Devenir Vendeur
+                 <Link to="/vendor-dashboard" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                   Espace Vendeur
+                 </Link>
+               </NavigationMenuItem>
+               <NavigationMenuItem>
+                 <Link to="/super-admin" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                   Super Admin
                  </Link>
                </NavigationMenuItem>
             </NavigationMenuList>
@@ -254,14 +254,14 @@ const Header = () => {
                     <Link to="/shop" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
                       Boutique
                     </Link>
-                    <Link to="/blog" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
-                      Blog
-                    </Link>
                      <Link to="/contact" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
                        Contact
                      </Link>
-                     <Link to="/become-vendor" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
-                       Devenir Vendeur
+                     <Link to="/vendor-dashboard" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                       Espace Vendeur
+                     </Link>
+                     <Link to="/super-admin" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                       Super Admin
                      </Link>
                   </div>
 

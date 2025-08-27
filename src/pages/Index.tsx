@@ -4,7 +4,7 @@ import Hero from "@/components/Hero";
 import ProductSection from "@/components/ProductSection";
 import BenefitsSection from "@/components/BenefitsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
-import BlogSection from "@/components/BlogSection";
+
 import Footer from "@/components/Footer";
 import ProductQuickView from "@/components/ProductQuickView";
 
@@ -154,7 +154,6 @@ const Index = () => {
         onQuickView={handleQuickView}
       />
       <TestimonialsSection />
-      <BlogSection />
       
       {/* Vue rapide des produits */}
       <ProductQuickView 

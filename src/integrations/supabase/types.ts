@@ -318,6 +318,156 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendor_analytics: {
+        Row: {
+          created_at: string
+          daily_orders: number | null
+          daily_sales: number | null
+          daily_views: number | null
+          date: string
+          id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_orders?: number | null
+          daily_sales?: number | null
+          daily_views?: number | null
+          date: string
+          id?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_orders?: number | null
+          daily_sales?: number | null
+          daily_views?: number | null
+          date?: string
+          id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_analytics_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_badges: {
+        Row: {
+          badge_name: string
+          badge_type: string
+          conditions_met: Json | null
+          description: string | null
+          earned_at: string
+          id: string
+          vendor_id: string
+        }
+        Insert: {
+          badge_name: string
+          badge_type: string
+          conditions_met?: Json | null
+          description?: string | null
+          earned_at?: string
+          id?: string
+          vendor_id: string
+        }
+        Update: {
+          badge_name?: string
+          badge_type?: string
+          conditions_met?: Json | null
+          description?: string | null
+          earned_at?: string
+          id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_badges_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_commission_plans: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          id: string
+          is_active: boolean | null
+          max_products: number | null
+          monthly_fee: number | null
+          plan: Database["public"]["Enums"]["vendor_plan"]
+          priority_support: boolean | null
+          transaction_fee: number | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          commission_rate: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_products?: number | null
+          monthly_fee?: number | null
+          plan: Database["public"]["Enums"]["vendor_plan"]
+          priority_support?: boolean | null
+          transaction_fee?: number | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_products?: number | null
+          monthly_fee?: number | null
+          plan?: Database["public"]["Enums"]["vendor_plan"]
+          priority_support?: boolean | null
+          transaction_fee?: number | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_commission_plans_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_notifications: {
         Row: {
           created_at: string
@@ -463,6 +613,7 @@ export type Database = {
       vendors: {
         Row: {
           approved_at: string | null
+          badges: Json | null
           business_description: string | null
           business_name: string
           business_registration_number: string | null
@@ -471,15 +622,22 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          last_plan_update: string | null
+          performance_score: number | null
           phone: string | null
+          plan: Database["public"]["Enums"]["vendor_plan"] | null
+          plan_history: Json | null
           status: string | null
           tax_number: string | null
+          total_orders: number | null
+          total_sales: number | null
           updated_at: string
           user_id: string
           website_url: string | null
         }
         Insert: {
           approved_at?: string | null
+          badges?: Json | null
           business_description?: string | null
           business_name: string
           business_registration_number?: string | null
@@ -488,15 +646,22 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          last_plan_update?: string | null
+          performance_score?: number | null
           phone?: string | null
+          plan?: Database["public"]["Enums"]["vendor_plan"] | null
+          plan_history?: Json | null
           status?: string | null
           tax_number?: string | null
+          total_orders?: number | null
+          total_sales?: number | null
           updated_at?: string
           user_id: string
           website_url?: string | null
         }
         Update: {
           approved_at?: string | null
+          badges?: Json | null
           business_description?: string | null
           business_name?: string
           business_registration_number?: string | null
@@ -505,9 +670,15 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          last_plan_update?: string | null
+          performance_score?: number | null
           phone?: string | null
+          plan?: Database["public"]["Enums"]["vendor_plan"] | null
+          plan_history?: Json | null
           status?: string | null
           tax_number?: string | null
+          total_orders?: number | null
+          total_sales?: number | null
           updated_at?: string
           user_id?: string
           website_url?: string | null
@@ -548,6 +719,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_vendor_badges: {
+        Args: { vendor_uuid: string }
+        Returns: undefined
+      }
+      calculate_vendor_performance: {
+        Args: { vendor_uuid: string }
+        Returns: number
+      }
       generate_sku: {
         Args: { product_title: string; vendor_uuid: string }
         Returns: string
@@ -556,9 +735,14 @@ export type Database = {
         Args: { vendor_uuid: string }
         Returns: Json
       }
+      update_vendor_plan: {
+        Args: { vendor_uuid: string }
+        Returns: Database["public"]["Enums"]["vendor_plan"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "user" | "admin" | "super_admin"
+      vendor_plan: "basic" | "premium" | "golden"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -685,6 +869,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["user", "admin", "super_admin"],
+      vendor_plan: ["basic", "premium", "golden"],
+    },
   },
 } as const
