@@ -113,15 +113,15 @@ const Cart = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
                       <div className="sm:col-span-2 flex items-center space-x-4">
                         <img
-                          src={item.products.image_url}
-                          alt={item.products.title}
+                          src={item.products?.image_url || '/placeholder.svg'}
+                          alt={item.products?.title || 'Produit'}
                           className="w-20 h-20 object-cover rounded-lg"
                         />
                         <div>
                           <Link to={`/product/${item.product_id}`}>
-                            <h3 className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">{item.products.title}</h3>
+                            <h3 className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">{item.products?.title || 'Produit non disponible'}</h3>
                           </Link>
-                          <p className="text-lg font-bold text-primary">{formatPrice(item.products.price)}</p>
+                          <p className="text-lg font-bold text-primary">{formatPrice(item.products?.price || 0)}</p>
                         </div>
                       </div>
 
@@ -147,7 +147,7 @@ const Cart = () => {
 
                       <div className="flex items-center justify-between">
                         <p className="font-bold text-lg">
-                          {formatPrice(item.products.price * item.quantity)}
+                          {formatPrice((item.products?.price || 0) * item.quantity)}
                         </p>
                         <Button
                           variant="ghost"

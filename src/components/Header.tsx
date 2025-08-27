@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +30,7 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const { getCartItemsCount } = useCart();
   const { wishlistItems } = useWishlist();
+  const { isVendor, isSuperAdmin } = useUserRole();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,26 +87,26 @@ const Header = () => {
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">GABOMAZONE</h1>
           </Link>
 
-          {/* Navigation Menu */}
+           {/* Navigation Menu */}
           <NavigationMenu className="hidden lg:flex">
-            <NavigationMenuList>
+            <NavigationMenuList className="flex-wrap">
               <NavigationMenuItem>
-                <Link to="/" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                <Link to="/" className="px-3 py-2 text-sm whitespace-nowrap text-foreground hover:text-primary transition-colors">
                   Accueil
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/about" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                <Link to="/about" className="px-3 py-2 text-sm whitespace-nowrap text-foreground hover:text-primary transition-colors">
                   À propos
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link to="/shop" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                <Link to="/shop" className="px-3 py-2 text-sm whitespace-nowrap text-foreground hover:text-primary transition-colors">
                   Boutique
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Pages</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="text-sm">Pages</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-6 w-[400px]">
                     <NavigationMenuLink asChild>
@@ -123,20 +125,24 @@ const Header = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
                <NavigationMenuItem>
-                 <Link to="/contact" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                 <Link to="/contact" className="px-3 py-2 text-sm whitespace-nowrap text-foreground hover:text-primary transition-colors">
                    Contact
                  </Link>
                </NavigationMenuItem>
-               <NavigationMenuItem>
-                 <Link to="/vendor-dashboard" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                   Espace Vendeur
-                 </Link>
-               </NavigationMenuItem>
-               <NavigationMenuItem>
-                 <Link to="/super-admin" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                   Super Admin
-                 </Link>
-               </NavigationMenuItem>
+               {isVendor && (
+                 <NavigationMenuItem>
+                   <Link to="/vendor-dashboard" className="px-3 py-2 text-sm whitespace-nowrap text-foreground hover:text-primary transition-colors">
+                     Espace Vendeur
+                   </Link>
+                 </NavigationMenuItem>
+               )}
+               {isSuperAdmin && (
+                 <NavigationMenuItem>
+                   <Link to="/super-admin" className="px-3 py-2 text-sm whitespace-nowrap text-foreground hover:text-primary transition-colors">
+                     Super Admin
+                   </Link>
+                 </NavigationMenuItem>
+               )}
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -257,12 +263,16 @@ const Header = () => {
                      <Link to="/contact" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
                        Contact
                      </Link>
-                     <Link to="/vendor-dashboard" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
-                       Espace Vendeur
-                     </Link>
-                     <Link to="/super-admin" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
-                       Super Admin
-                     </Link>
+                     {isVendor && (
+                       <Link to="/vendor-dashboard" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                         Espace Vendeur
+                       </Link>
+                     )}
+                     {isSuperAdmin && (
+                       <Link to="/super-admin" className="block px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md hover:bg-accent">
+                         Super Admin
+                       </Link>
+                     )}
                   </div>
 
                   {/* Mobile User Actions */}

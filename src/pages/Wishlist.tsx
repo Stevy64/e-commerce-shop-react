@@ -68,12 +68,11 @@ const Wishlist = () => {
                 <ProductCard
                   key={item.id}
                   id={item.product_id}
-                  image={item.products.image_url}
-                  title={item.products.title}
-                  price={item.products.price}
-                  originalPrice={item.products.original_price}
-                  discount={item.products.discount}
-                  description={(item.products as any)?.description}
+                  image={item.products?.image_url || '/placeholder.svg'}
+                  title={item.products?.title || 'Produit non disponible'}
+                  price={item.products?.price || 0}
+                  originalPrice={item.products?.original_price}
+                  discount={item.products?.discount}
                 />
               ))}
             </div>
