@@ -25,11 +25,12 @@ interface Product {
   updated_at: string;
 }
 
-interface ProductFormData {
+export interface ProductFormData {
   title: string;
   description?: string;
   price: number;
   original_price?: number;
+  discount?: number;
   stock_quantity: number;
   weight?: number;
   dimensions?: {

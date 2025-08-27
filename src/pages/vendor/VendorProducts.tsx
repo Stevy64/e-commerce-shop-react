@@ -2,7 +2,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { useVendor } from "@/hooks/useVendor";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useProducts } from "@/hooks/useProducts";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,13 @@ import { formatPrice as formatCurrency } from "@/utils/currency";
 
 export default function VendorProducts() {
   const { user, loading: authLoading } = useAuth();
-  const { vendor, isApprovedVendor } = useVendor();
+  const { isVendor, loading: roleLoading } = useUserRole();
   const { products, loading, deleteProduct } = useProducts();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  if (authLoading) {
+  if (authLoading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
 
@@ -30,28 +30,8 @@ export default function VendorProducts() {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!vendor) {
+  if (!isVendor) {
     return <Navigate to="/become-vendor" replace />;
-  }
-
-  if (!isApprovedVendor()) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Compte en attente d'approbation</h2>
-              <p className="text-muted-foreground">
-                Votre demande vendeur est en cours d'examen. Vous pourrez gérer vos produits une fois approuvé.
-              </p>
-            </CardContent>
-          </Card>
-        </main>
-        <Footer />
-      </div>
-    );
   }
 
   // Filtrer les produits

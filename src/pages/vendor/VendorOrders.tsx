@@ -2,7 +2,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { useVendor } from "@/hooks/useVendor";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useVendorOrders } from "@/hooks/useVendorOrders";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import { fr } from "date-fns/locale";
 
 export default function VendorOrders() {
   const { user, loading: authLoading } = useAuth();
-  const { vendor, isApprovedVendor } = useVendor();
+  const { isVendor, loading: roleLoading } = useUserRole();
   const { orders, stats, loading, updateOrderStatus, getOrderDetails } = useVendorOrders();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,7 +26,7 @@ export default function VendorOrders() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
 
-  if (authLoading) {
+  if (authLoading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
 
@@ -34,12 +34,8 @@ export default function VendorOrders() {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!vendor) {
+  if (!isVendor) {
     return <Navigate to="/become-vendor" replace />;
-  }
-
-  if (!isApprovedVendor()) {
-    return <Navigate to="/vendor-dashboard" replace />;
   }
 
   // Filtrer les commandes

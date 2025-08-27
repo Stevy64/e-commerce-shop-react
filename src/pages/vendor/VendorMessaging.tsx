@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
-import { useVendor } from "@/hooks/useVendor";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useMessaging } from "@/hooks/useMessaging";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { fr } from "date-fns/locale";
 
 export default function VendorMessaging() {
   const { user, loading: authLoading } = useAuth();
-  const { vendor, isApprovedVendor } = useVendor();
+  const { isVendor, loading: roleLoading } = useUserRole();
   const { conversations, messages, loading, fetchMessages, sendMessage } = useMessaging();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
@@ -30,12 +30,8 @@ export default function VendorMessaging() {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!vendor) {
+  if (!isVendor) {
     return <Navigate to="/become-vendor" replace />;
-  }
-
-  if (!isApprovedVendor()) {
-    return <Navigate to="/vendor-dashboard" replace />;
   }
 
   const handleConversationSelect = async (conversationId: string) => {
