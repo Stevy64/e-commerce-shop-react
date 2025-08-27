@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Mail, Phone, MapPin, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, Navigate } from "react-router-dom";
+import ProfileSettings from "@/components/ProfileSettings";
 
 const Account = () => {
   const { user, signOut } = useAuth();
@@ -89,37 +90,7 @@ const Account = () => {
                 </TabsList>
 
                 <TabsContent value="profile">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <User className="h-5 w-5" />
-                        <span>Informations Personnelles</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="displayName">Nom d'affichage</Label>
-                          <Input
-                            id="displayName"
-                            value={displayName}
-                            onChange={(e) => setDisplayName(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={email}
-                            disabled
-                            className="bg-muted"
-                          />
-                        </div>
-                      </div>
-                      <Button>Sauvegarder les modifications</Button>
-                    </CardContent>
-                  </Card>
+                  <ProfileSettings />
                 </TabsContent>
 
                 <TabsContent value="security">

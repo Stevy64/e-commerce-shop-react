@@ -15,6 +15,11 @@ const Shop = () => {
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [sortBy, setSortBy] = useState("default");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -44,18 +49,66 @@ const Shop = () => {
     }
   }, []);
 
-  // Filter products based on search query
+  // Filter and sort products based on all criteria
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredProducts(products);
-    } else {
-      const filtered = products.filter(product =>
+    let filtered = [...products];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(product =>
         product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description?.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredProducts(filtered);
     }
-  }, [searchQuery, products]);
+
+    // Category filter
+    if (selectedCategories.length > 0 && !selectedCategories.includes("All Categories")) {
+      filtered = filtered.filter(product =>
+        selectedCategories.some(category => 
+          product.title.toLowerCase().includes(category.toLowerCase())
+        )
+      );
+    }
+
+    // Brand filter
+    if (selectedBrands.length > 0) {
+      filtered = filtered.filter(product =>
+        selectedBrands.some(brand => 
+          product.title.toLowerCase().includes(brand.toLowerCase())
+        )
+      );
+    }
+
+    // Price range filter
+    if (priceRange.min) {
+      filtered = filtered.filter(product => product.price >= parseFloat(priceRange.min));
+    }
+    if (priceRange.max) {
+      filtered = filtered.filter(product => product.price <= parseFloat(priceRange.max));
+    }
+
+    // Sort products
+    switch (sortBy) {
+      case "price":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "date":
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case "popularity":
+        // Simuler le tri par popularité (par id pour l'exemple)
+        filtered.sort((a, b) => a.id.localeCompare(b.id));
+        break;
+      default:
+        // Tri par défaut
+        break;
+    }
+
+    setFilteredProducts(filtered);
+  }, [searchQuery, products, selectedCategories, selectedBrands, priceRange, sortBy]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -64,6 +117,35 @@ const Shop = () => {
       ? `${window.location.pathname}?search=${encodeURIComponent(query.trim())}`
       : window.location.pathname;
     window.history.pushState({}, '', newUrl);
+  };
+
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    setSelectedCategories(prev => 
+      checked 
+        ? [...prev, category]
+        : prev.filter(c => c !== category)
+    );
+  };
+
+  const handleBrandChange = (brand: string, checked: boolean) => {
+    setSelectedBrands(prev => 
+      checked 
+        ? [...prev, brand]
+        : prev.filter(b => b !== brand)
+    );
+  };
+
+  const handlePriceFilter = () => {
+    // Le filtre se met à jour automatiquement via useEffect
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    setSelectedCategories([]);
+    setSelectedBrands([]);
+    setPriceRange({ min: "", max: "" });
+    setSortBy("default");
+    window.history.pushState({}, '', window.location.pathname);
   };
 
   const categories = [
@@ -130,7 +212,11 @@ const Shop = () => {
                       <div className="space-y-2">
                         {categories.map((category) => (
                           <div key={category} className="flex items-center space-x-2">
-                            <Checkbox id={`mobile-${category}`} />
+                            <Checkbox 
+                              id={`mobile-${category}`} 
+                              checked={selectedCategories.includes(category)}
+                              onCheckedChange={(checked) => handleCategoryChange(category, !!checked)}
+                            />
                             <label htmlFor={`mobile-${category}`} className="text-sm cursor-pointer">
                               {category}
                             </label>
@@ -143,11 +229,23 @@ const Shop = () => {
                       <h3 className="text-lg font-semibold mb-4">Gamme de prix</h3>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                          <Input type="number" placeholder="Min" className="w-20" />
+                          <Input 
+                            type="number" 
+                            placeholder="Min" 
+                            className="w-20"
+                            value={priceRange.min}
+                            onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                          />
                           <span>-</span>
-                          <Input type="number" placeholder="Max" className="w-20" />
+                          <Input 
+                            type="number" 
+                            placeholder="Max" 
+                            className="w-20"
+                            value={priceRange.max}
+                            onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                          />
                         </div>
-                        <Button size="sm" className="w-full">Filtrer</Button>
+                        <Button size="sm" className="w-full" onClick={handlePriceFilter}>Filtrer</Button>
                       </div>
                     </div>
 
@@ -156,7 +254,11 @@ const Shop = () => {
                       <div className="space-y-2">
                         {brands.map((brand) => (
                           <div key={brand} className="flex items-center space-x-2">
-                            <Checkbox id={`mobile-${brand}`} />
+                            <Checkbox 
+                              id={`mobile-${brand}`}
+                              checked={selectedBrands.includes(brand)}
+                              onCheckedChange={(checked) => handleBrandChange(brand, !!checked)}
+                            />
                             <label htmlFor={`mobile-${brand}`} className="text-sm cursor-pointer">
                               {brand}
                             </label>
@@ -192,7 +294,11 @@ const Shop = () => {
                   <div className="space-y-2">
                     {categories.map((category) => (
                       <div key={category} className="flex items-center space-x-2">
-                        <Checkbox id={category} />
+                        <Checkbox 
+                          id={category}
+                          checked={selectedCategories.includes(category)}
+                          onCheckedChange={(checked) => handleCategoryChange(category, !!checked)}
+                        />
                         <label htmlFor={category} className="text-sm cursor-pointer">
                           {category}
                         </label>
@@ -206,11 +312,23 @@ const Shop = () => {
                   <h3 className="text-lg font-semibold mb-4">Gamme de prix</h3>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Input type="number" placeholder="Min" className="w-20" />
+                      <Input 
+                        type="number" 
+                        placeholder="Min" 
+                        className="w-20"
+                        value={priceRange.min}
+                        onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                      />
                       <span>-</span>
-                      <Input type="number" placeholder="Max" className="w-20" />
+                      <Input 
+                        type="number" 
+                        placeholder="Max" 
+                        className="w-20"
+                        value={priceRange.max}
+                        onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                      />
                     </div>
-                    <Button size="sm" className="w-full">Filtrer</Button>
+                    <Button size="sm" className="w-full" onClick={handlePriceFilter}>Filtrer</Button>
                   </div>
                 </div>
 
@@ -220,7 +338,11 @@ const Shop = () => {
                   <div className="space-y-2">
                     {brands.map((brand) => (
                       <div key={brand} className="flex items-center space-x-2">
-                        <Checkbox id={brand} />
+                        <Checkbox 
+                          id={brand}
+                          checked={selectedBrands.includes(brand)}
+                          onCheckedChange={(checked) => handleBrandChange(brand, !!checked)}
+                        />
                         <label htmlFor={brand} className="text-sm cursor-pointer">
                           {brand}
                         </label>
@@ -243,7 +365,7 @@ const Shop = () => {
                 </div>
                 
                 <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-                  <Select defaultValue="default">
+                  <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger className="w-full sm:w-48">
                       <SelectValue placeholder="Trier par" />
                     </SelectTrigger>
@@ -258,13 +380,29 @@ const Shop = () => {
                   </Select>
                   
                   <div className="flex items-center space-x-1 sm:space-x-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                    <Button 
+                      variant={viewMode === "grid" ? "default" : "outline"} 
+                      size="icon" 
+                      className="h-8 w-8 sm:h-10 sm:w-10"
+                      onClick={() => setViewMode("grid")}
+                    >
                       <Grid className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                    <Button 
+                      variant={viewMode === "list" ? "default" : "outline"} 
+                      size="icon" 
+                      className="h-8 w-8 sm:h-10 sm:w-10"
+                      onClick={() => setViewMode("list")}
+                    >
                       <List className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
+                  
+                  {(selectedCategories.length > 0 || selectedBrands.length > 0 || priceRange.min || priceRange.max || searchQuery) && (
+                    <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                      Effacer les filtres
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -294,7 +432,11 @@ const Shop = () => {
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className={
+                  viewMode === "grid" 
+                    ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8"
+                    : "space-y-4 mb-6 sm:mb-8"
+                }>
                   {filteredProducts.map((product) => (
                     <ProductCard 
                       key={product.id} 
@@ -305,6 +447,7 @@ const Shop = () => {
                       originalPrice={product.original_price}
                       discount={product.discount}
                       isNew={product.is_new}
+                      description={product.description}
                     />
                   ))}
                 </div>

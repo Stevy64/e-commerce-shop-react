@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import OrderDetails from "@/components/OrderDetails";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,8 @@ const Orders = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   if (!user) {
     return <Navigate to="/auth" replace />;
@@ -171,8 +174,15 @@ const Orders = () => {
                         </p>
                       </div>
                       
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                       <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setShowOrderDetails(true);
+                          }}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           Détails
                         </Button>
@@ -210,6 +220,12 @@ const Orders = () => {
           )}
         </div>
       </section>
+
+      <OrderDetails 
+        order={selectedOrder}
+        isOpen={showOrderDetails}
+        onClose={() => setShowOrderDetails(false)}
+      />
 
       <Footer />
     </div>
