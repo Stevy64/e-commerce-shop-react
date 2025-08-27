@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useVendorAuth } from "@/hooks/useVendorAuth";
 import { useMessaging } from "@/hooks/useMessaging";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,24 +12,24 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, User, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 import { fr } from "date-fns/locale";
 
 export default function VendorMessaging() {
-  const { user, loading: authLoading } = useAuth();
-  const { isVendor, loading: roleLoading } = useUserRole();
-  const { conversations, messages, loading, fetchMessages, sendMessage } = useMessaging();
+  const { user, loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
+  const { conversations, messages, loading: messagingLoading, fetchMessages, sendMessage } = useMessaging();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
 
-  if (authLoading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
 
-  if (!user) {
+  if (shouldRedirectToAuth) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!isVendor) {
+  if (shouldRedirectToBecomeVendor) {
     return <Navigate to="/become-vendor" replace />;
   }
 
@@ -84,6 +83,13 @@ export default function VendorMessaging() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="outline" asChild>
+              <Link to="/vendor-dashboard">
+                ← Retour au Dashboard
+              </Link>
+            </Button>
+          </div>
           <div className="flex items-center gap-3 mb-2">
             <MessageCircle className="h-8 w-8" />
             <h1 className="text-3xl font-bold">Ma Messagerie</h1>
@@ -104,7 +110,7 @@ export default function VendorMessaging() {
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[500px]">
-                {loading ? (
+                {messagingLoading ? (
                   <div className="p-4 text-center text-muted-foreground">
                     Chargement des conversations...
                   </div>

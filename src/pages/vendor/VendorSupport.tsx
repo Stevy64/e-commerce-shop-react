@@ -1,10 +1,11 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useVendorAuth } from "@/hooks/useVendorAuth";
+import { useVendor } from "@/hooks/useVendor";
 import { useMessaging } from "@/hooks/useMessaging";
-import { Navigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Navigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,9 +27,9 @@ interface SupportFormData {
 }
 
 export default function VendorSupport() {
-  const { user, loading: authLoading } = useAuth();
-  const { isVendor, loading: roleLoading } = useUserRole();
-  const { supportTickets, loading, createSupportTicket, fetchSupportTickets } = useMessaging();
+  const { user, loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
+  const { getVendorId } = useVendor();
+  const { supportTickets, loading: messagingLoading, createSupportTicket, fetchSupportTickets } = useMessaging();
   const [formData, setFormData] = useState<SupportFormData>({
     subject: "",
     description: "",
@@ -39,15 +40,15 @@ export default function VendorSupport() {
 
   // Note: Nous chargerons les tickets via un effet une fois que nous aurons l'ID vendeur
 
-  if (authLoading || roleLoading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
 
-  if (!user) {
+  if (shouldRedirectToAuth) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!isVendor) {
+  if (shouldRedirectToBecomeVendor) {
     return <Navigate to="/become-vendor" replace />;
   }
 
@@ -65,9 +66,14 @@ export default function VendorSupport() {
     setSubmitting(true);
     
     try {
-      // Note: Temporary implementation - nous devrons obtenir l'ID vendeur
+      const vendorId = getVendorId();
+      if (!vendorId) {
+        toast.error('Erreur: Profil vendeur non trouvé');
+        return;
+      }
+      
       await createSupportTicket(
-        user.id, // Utiliser l'ID utilisateur temporairement
+        vendorId,
         formData.subject.trim(),
         formData.description.trim(),
         formData.priority,
@@ -132,6 +138,13 @@ export default function VendorSupport() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="outline" asChild>
+              <Link to="/vendor-dashboard">
+                ← Retour au Dashboard
+              </Link>
+            </Button>
+          </div>
           <div className="flex items-center gap-3 mb-2">
             <HelpCircle className="h-8 w-8" />
             <h1 className="text-3xl font-bold">Support Vendeur</h1>
@@ -240,7 +253,7 @@ export default function VendorSupport() {
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[600px]">
-                {loading ? (
+                {messagingLoading ? (
                   <div className="p-4 text-center text-muted-foreground">
                     Chargement des tickets...
                   </div>

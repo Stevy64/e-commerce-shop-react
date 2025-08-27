@@ -89,50 +89,55 @@ export default function SuperAdminDashboard() {
       setLoading(true);
       
       // Récupérer les vendeurs avec leurs profils
-      const { data: vendorsData } = await supabase
+      const { data: vendorsData, error: vendorError } = await supabase
         .from('vendors')
         .select(`
           *,
-          profiles:user_id (
+          profiles!vendors_user_id_fkey (
             display_name,
             first_name,
             last_name,
-            phone,
-            email
+            phone
           )
         `)
         .order('created_at', { ascending: false });
 
+      if (vendorError) {
+        console.error('Erreur vendors:', vendorError);
+      }
       setVendors(vendorsData || []);
 
       // Récupérer tous les produits
-      const { data: productsData } = await supabase
+      const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
           *,
-          vendor:vendor_id (
+          vendors!products_vendor_id_fkey (
             business_name
           )
         `)
         .order('created_at', { ascending: false });
 
+      if (productsError) {
+        console.error('Erreur products:', productsError);
+      }
       setAllProducts(productsData || []);
 
       // Récupérer toutes les commandes
-      const { data: ordersData } = await supabase
+      const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
           *,
-          profiles:user_id (
+          profiles!orders_user_id_fkey (
             display_name,
             first_name,
             last_name
           ),
           order_items (
             *,
-            product:product_id (
+            products!order_items_product_id_fkey (
               title,
-              vendor:vendor_id (
+              vendors!products_vendor_id_fkey (
                 business_name
               )
             )
@@ -140,51 +145,50 @@ export default function SuperAdminDashboard() {
         `)
         .order('created_at', { ascending: false });
 
+      if (ordersError) {
+        console.error('Erreur orders:', ordersError);
+      }
       setAllOrders(ordersData || []);
 
       // Récupérer les tickets de support
-      const { data: ticketsData } = await supabase
+      const { data: ticketsData, error: ticketsError } = await supabase
         .from('support_tickets')
         .select(`
           *,
-          vendor:vendor_id (
+          vendors!support_tickets_vendor_id_fkey (
             business_name,
-            profiles:user_id (
+            profiles!vendors_user_id_fkey (
               display_name
             )
           )
         `)
         .order('created_at', { ascending: false });
 
+      if (ticketsError) {
+        console.error('Erreur tickets:', ticketsError);
+      }
       setSupportTickets(ticketsData || []);
 
-      // Récupérer les conversations
-      const { data: conversationsData } = await supabase
+      // Récupérer les conversations (simplifié)
+      const { data: conversationsData, error: conversationsError } = await supabase
         .from('conversations')
-        .select(`
-          *,
-          conversation_participants (
-            user_id,
-            profiles:user_id (
-              display_name,
-              first_name,
-              last_name
-            )
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
+      if (conversationsError) {
+        console.error('Erreur conversations:', conversationsError);
+      }
       setConversations(conversationsData || []);
 
       // Calculer les statistiques
-      const { data: usersCount } = await supabase
+      const { count: usersCount } = await supabase
         .from('profiles')
-        .select('id', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true });
 
       const totalRevenue = ordersData?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
 
       setStats({
-        totalUsers: usersCount?.length || 0,
+        totalUsers: usersCount || 0,
         totalVendors: vendorsData?.length || 0,
         totalOrders: ordersData?.length || 0,
         totalRevenue
@@ -363,26 +367,24 @@ export default function SuperAdminDashboard() {
                               {vendor.plan}
                             </Badge>
                           </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div>
-                              <span className="font-medium">Email:</span><br />
-                              {vendor.email}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <span className="font-medium">Email:</span><br />
+                                {vendor.email || vendor.profiles?.email || 'N/A'}
+                              </div>
+                              <div>
+                                <span className="font-medium">Nom:</span><br />
+                                {vendor.profiles?.display_name || `${vendor.profiles?.first_name || ''} ${vendor.profiles?.last_name || ''}`}
+                              </div>
+                              <div>
+                                <span className="font-medium">Ventes:</span><br />
+                                {formatCurrency(vendor.total_sales || 0)}
+                              </div>
+                              <div>
+                                <span className="font-medium">Commandes:</span><br />
+                                {vendor.total_orders || 0}
+                              </div>
                             </div>
-                            <div>
-                              <span className="font-medium">Ventes:</span><br />
-                              {formatCurrency(vendor.total_sales || 0)}
-                            </div>
-                            <div>
-                              <span className="font-medium">Commandes:</span><br />
-                              {vendor.total_orders || 0}
-                            </div>
-                            <div>
-                              <span className="font-medium">Score:</span><br />
-                              <span className={getPerformanceColor(vendor.performance_score || 0)}>
-                                {vendor.performance_score || 0}/100
-                              </span>
-                            </div>
-                          </div>
                         </div>
                         <div className="flex gap-2">
                           {vendor.status === 'pending' && (

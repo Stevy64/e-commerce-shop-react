@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useVendorAuth } from "@/hooks/useVendorAuth";
 import { useProducts, ProductFormData } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +14,7 @@ import { toast } from "sonner";
 import { Save, ArrowLeft, Package } from "lucide-react";
 
 export default function VendorProductForm() {
-  const { user, loading: authLoading } = useAuth();
-  const { isVendor, loading: roleLoading } = useUserRole();
+  const { loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
   const { createProduct, updateProduct, getProduct } = useProducts();
   const navigate = useNavigate();
   const { productId } = useParams();

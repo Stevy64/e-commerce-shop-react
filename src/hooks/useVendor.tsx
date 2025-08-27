@@ -254,6 +254,13 @@ export const useVendor = () => {
     return !!vendor;
   };
 
+  /**
+   * Obtenir l'ID du vendeur s'il existe
+   */
+  const getVendorId = () => {
+    return vendor?.id || null;
+  };
+
   // Charger les données au montage et changement d'utilisateur
   useEffect(() => {
     if (user) {
@@ -275,6 +282,7 @@ export const useVendor = () => {
     createShop,
     fetchVendorData,
     isApprovedVendor,
-    hasVendorProfile
+    hasVendorProfile,
+    getVendorId
   };
 };

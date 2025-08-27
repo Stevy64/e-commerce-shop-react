@@ -1,8 +1,9 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/hooks/useAuth";
+import { useVendorAuth } from "@/hooks/useVendorAuth";
 import { useVendor } from "@/hooks/useVendor";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,18 +24,18 @@ import {
 } from "lucide-react";
 
 export default function VendorGuide() {
-  const { user, loading: authLoading } = useAuth();
+  const { loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
   const { vendor, isApprovedVendor } = useVendor();
 
-  if (authLoading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
 
-  if (!user) {
+  if (shouldRedirectToAuth) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!vendor) {
+  if (shouldRedirectToBecomeVendor) {
     return <Navigate to="/become-vendor" replace />;
   }
 
@@ -74,6 +75,13 @@ export default function VendorGuide() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="outline" asChild>
+              <Link to="/vendor-dashboard">
+                ← Retour au Dashboard
+              </Link>
+            </Button>
+          </div>
           <div className="flex items-center gap-3 mb-2">
             <BookOpen className="h-8 w-8" />
             <h1 className="text-3xl font-bold">Guide du Vendeur</h1>

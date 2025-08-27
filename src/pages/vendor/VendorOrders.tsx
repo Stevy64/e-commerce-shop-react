@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useVendorAuth } from "@/hooks/useVendorAuth";
 import { useVendorOrders } from "@/hooks/useVendorOrders";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,28 +12,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Package, Truck, CheckCircle, Clock, Eye, ArrowUpRight } from "lucide-react";
 import { formatPrice as formatCurrency } from "@/utils/currency";
+import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 export default function VendorOrders() {
-  const { user, loading: authLoading } = useAuth();
-  const { isVendor, loading: roleLoading } = useUserRole();
-  const { orders, stats, loading, updateOrderStatus, getOrderDetails } = useVendorOrders();
+  const { loading, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
+  const { orders, stats, loading: ordersLoading, updateOrderStatus, getOrderDetails } = useVendorOrders();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
 
-  if (authLoading || roleLoading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
   }
 
-  if (!user) {
+  if (shouldRedirectToAuth) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!isVendor) {
+  if (shouldRedirectToBecomeVendor) {
     return <Navigate to="/become-vendor" replace />;
   }
 
@@ -91,6 +90,13 @@ export default function VendorOrders() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="outline" asChild>
+              <Link to="/vendor-dashboard">
+                ← Retour au Dashboard
+              </Link>
+            </Button>
+          </div>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold">Mes Commandes</h1>
@@ -154,7 +160,7 @@ export default function VendorOrders() {
         </div>
 
         {/* Liste des commandes */}
-        {loading ? (
+        {ordersLoading ? (
           <div className="text-center py-8">Chargement des commandes...</div>
         ) : filteredOrders.length === 0 ? (
           <Card>
