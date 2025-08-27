@@ -49,7 +49,9 @@ export const useWishlist = () => {
         description: "Impossible de charger la liste de souhaits",
       });
     } else {
-      setWishlistItems(data || []);
+      // Filter out items with null products
+      const validItems = (data || []).filter(item => item.products !== null);
+      setWishlistItems(validItems);
     }
     setLoading(false);
   };

@@ -5,36 +5,23 @@ import { supabase } from "@/integrations/supabase/client";
  * À utiliser uniquement pour les tests et la configuration initiale
  */
 export const assignSuperAdminRole = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    console.error('Aucun utilisateur connecté');
-    return { success: false, error: 'Aucun utilisateur connecté' };
-  }
-
   try {
-    // D'abord, supprimer tout autre super admin existant
-    await supabase
-      .from('user_roles')
-      .delete()
-      .eq('role', 'super_admin');
-
-    // Ensuite, attribuer le rôle super_admin à l'utilisateur actuel
-    const { error } = await supabase
-      .from('user_roles')
-      .upsert({ 
-        user_id: user.id, 
-        role: 'super_admin',
-        assigned_by: user.id
-      });
-
+    const { data, error } = await supabase.rpc('assign_super_admin_role_safe');
+    
     if (error) {
       console.error('Erreur lors de l\'attribution du rôle super admin:', error);
       return { success: false, error: error.message };
     }
 
-    console.log('Rôle super admin attribué avec succès à:', user.email);
-    return { success: true, userId: user.id };
+    const result = data as { success: boolean; user_id?: string; error?: string };
+    
+    if (result.success) {
+      console.log('Rôle super admin attribué avec succès');
+      return { success: true, userId: result.user_id };
+    } else {
+      console.error('Erreur:', result.error);
+      return { success: false, error: result.error };
+    }
   } catch (error) {
     console.error('Erreur:', error);
     return { success: false, error: 'Erreur inattendue' };

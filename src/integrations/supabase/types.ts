@@ -719,6 +719,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_super_admin_role_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       award_vendor_badges: {
         Args: { vendor_uuid: string }
         Returns: undefined
@@ -729,6 +733,10 @@ export type Database = {
       }
       generate_sku: {
         Args: { product_title: string; vendor_uuid: string }
+        Returns: string
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
       get_vendor_stats: {

@@ -47,7 +47,9 @@ export const useCart = () => {
         description: "Impossible de charger le panier",
       });
     } else {
-      setCartItems(data || []);
+      // Filter out items with null products
+      const validItems = (data || []).filter(item => item.products !== null);
+      setCartItems(validItems);
     }
     setLoading(false);
   };
@@ -147,6 +149,7 @@ export const useCart = () => {
 
   const getCartTotal = () => {
     return cartItems.reduce((total, item) => {
+      if (!item.products) return total;
       return total + (item.products.price * item.quantity);
     }, 0);
   };
