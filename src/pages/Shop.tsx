@@ -12,7 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Shop = () => {
   const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -25,12 +27,44 @@ const Shop = () => {
         console.error('Error fetching products:', error);
       } else {
         setProducts(data || []);
+        setFilteredProducts(data || []);
       }
       setLoading(false);
     };
 
     fetchProducts();
   }, []);
+
+  // Get search query from URL params on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, []);
+
+  // Filter products based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchQuery, products]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // Update URL without reloading the page
+    const newUrl = query.trim() 
+      ? `${window.location.pathname}?search=${encodeURIComponent(query.trim())}`
+      : window.location.pathname;
+    window.history.pushState({}, '', newUrl);
+  };
 
   const categories = [
     "All Categories",
@@ -82,7 +116,12 @@ const Shop = () => {
                       <h3 className="text-lg font-semibold mb-4">Rechercher</h3>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input placeholder="Rechercher..." className="pl-10" />
+                        <Input 
+                          placeholder="Rechercher..." 
+                          className="pl-10"
+                          value={searchQuery}
+                          onChange={(e) => handleSearch(e.target.value)}
+                        />
                       </div>
                     </div>
 
@@ -138,7 +177,12 @@ const Shop = () => {
                   <h3 className="text-lg font-semibold mb-4">Rechercher</h3>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Rechercher..." className="pl-10" />
+                    <Input 
+                      placeholder="Rechercher..." 
+                      className="pl-10"
+                      value={searchQuery}
+                      onChange={(e) => handleSearch(e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -193,7 +237,8 @@ const Shop = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-muted-foreground">
-                    Affichage 1-{products.length} sur {products.length} résultats
+                    Affichage 1-{filteredProducts.length} sur {filteredProducts.length} résultats
+                    {searchQuery && ` pour "${searchQuery}"`}
                   </span>
                 </div>
                 
@@ -234,9 +279,23 @@ const Shop = () => {
                     </div>
                   ))}
                 </div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground mb-4">
+                    {searchQuery ? `Aucun produit trouvé pour "${searchQuery}"` : "Aucun produit disponible"}
+                  </p>
+                  {searchQuery && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleSearch("")}
+                    >
+                      Effacer la recherche
+                    </Button>
+                  )}
+                </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                  {products.map((product) => (
+                  {filteredProducts.map((product) => (
                     <ProductCard 
                       key={product.id} 
                       id={product.id}

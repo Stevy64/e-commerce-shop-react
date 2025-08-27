@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,8 +25,17 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { user, signOut } = useAuth();
   const { getCartItemsCount } = useCart();
+  const { wishlistItems } = useWishlist();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/shop?search=${encodeURIComponent(searchQuery.trim())}`;
+    }
+  };
 
   return (
     <>
@@ -128,14 +138,16 @@ const Header = () => {
           {/* Right Side */}
           <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Search - Hidden on mobile */}
-            <div className="relative hidden lg:block">
+            <form onSubmit={handleSearch} className="relative hidden lg:block">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Rechercher..."
                 className="pl-10 w-48 xl:w-64 rounded-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
+            </form>
 
             {/* Search icon for mobile/tablet */}
             <Button variant="ghost" size="icon" className="lg:hidden">
@@ -146,9 +158,11 @@ const Header = () => {
             <Link to="/wishlist">
               <Button variant="ghost" size="icon" className="relative hidden sm:flex">
                 <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
-                  2
-                </span>
+                {wishlistItems.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-accent text-xs text-accent-foreground flex items-center justify-center">
+                    {wishlistItems.length}
+                  </span>
+                )}
               </Button>
             </Link>
 
@@ -213,14 +227,16 @@ const Header = () => {
                   </div>
                   
                   {/* Mobile Search */}
-                  <div className="relative lg:hidden">
+                  <form onSubmit={handleSearch} className="relative lg:hidden">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       type="search"
                       placeholder="Rechercher..."
                       className="pl-10 rounded-full"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                  </div>
+                  </form>
 
                   {/* Navigation Links */}
                   <div className="space-y-2">
@@ -279,7 +295,7 @@ const Header = () => {
                         <Link to="/wishlist">
                           <Button variant="outline" className="w-full justify-start sm:hidden" onClick={() => setMobileMenuOpen(false)}>
                             <Heart className="h-4 w-4 mr-2" />
-                            Liste de souhaits
+                            Liste de souhaits ({wishlistItems.length})
                           </Button>
                         </Link>
                       </>
