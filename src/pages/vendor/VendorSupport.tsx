@@ -4,7 +4,8 @@ import Footer from "@/components/Footer";
 import { useVendorAuth } from "@/hooks/useVendorAuth";
 import { useVendor } from "@/hooks/useVendor";
 import { useMessaging } from "@/hooks/useMessaging";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Navigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +30,8 @@ interface SupportFormData {
 export default function VendorSupport() {
   const { user, loading, isVendor, shouldRedirectToAuth, shouldRedirectToBecomeVendor } = useVendorAuth();
   const { getVendorId } = useVendor();
-  const { supportTickets, loading: messagingLoading, createSupportTicket, fetchSupportTickets } = useMessaging();
+  const { supportTickets, loading: messagingLoading, fetchSupportTickets } = useMessaging();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<SupportFormData>({
     subject: "",
     description: "",
@@ -74,17 +76,44 @@ export default function VendorSupport() {
     try {
       const vendorId = getVendorId();
       if (!vendorId) {
-        toast.error('Erreur: Profil vendeur non trouvé');
+        toast({
+          title: "Erreur",
+          description: "Erreur: Profil vendeur non trouvé",
+          variant: "destructive"
+        });
         return;
       }
       
-      await createSupportTicket(
-        vendorId,
-        formData.subject.trim(),
-        formData.description.trim(),
-        formData.priority,
-        formData.channel
-      );
+      // Créer le ticket de support
+      const { data: ticketData, error: ticketError } = await supabase
+        .from('support_tickets')
+        .insert({
+          vendor_id: vendorId,
+          subject: formData.subject.trim(),
+          description: formData.description.trim(),
+          priority: formData.priority,
+          channel: formData.channel
+        })
+        .select('id')
+        .single();
+
+      if (ticketError) throw ticketError;
+
+      // Envoyer l'email au super admin
+      try {
+        await supabase.functions.invoke('send-support-email', {
+          body: {
+            subject: formData.subject.trim(),
+            message: formData.description.trim(),
+            senderEmail: user?.email || '',
+            senderName: user?.user_metadata?.display_name || 'Vendeur',
+            ticketId: ticketData.id
+          }
+        });
+      } catch (emailError) {
+        console.error('Error sending support email:', emailError);
+        // Ne pas bloquer le processus si l'email échoue
+      }
       
       // Reset form
       setFormData({
@@ -94,11 +123,23 @@ export default function VendorSupport() {
         channel: 'message'
       });
       
+      toast({
+        title: "Succès",
+        description: "Ticket de support créé avec succès !"
+      });
+      
       // Refresh support tickets
       const currentVendorId = getVendorId();
       if (currentVendorId) {
         await fetchSupportTickets(currentVendorId);
       }
+    } catch (error) {
+      console.error('Erreur lors de la création du ticket:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la création du ticket de support",
+        variant: "destructive"
+      });
     } finally {
       setSubmitting(false);
     }
