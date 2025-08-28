@@ -27,6 +27,9 @@ import {
   Clock,
   BarChart3
 } from "lucide-react";
+import VendorProductsTab from "@/components/VendorProductsTab";
+import VendorShopsTab from "@/components/VendorShopsTab";
+import VendorProfileTab from "@/components/VendorProfileTab";
 
 /**
  * Dashboard vendeur inspiré d'Amazon Seller Central
@@ -321,202 +324,17 @@ const VendorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="products">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold">Mes Produits</h3>
-                <div className="flex gap-2">
-                  <Button asChild>
-                    <Link to="/vendor/products/new">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nouveau Produit
-                    </Link>
-                  </Button>
-                  <Button variant="outline" asChild>
-                    <Link to="/vendor/products">
-                      Voir tous les produits
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-
-              {products.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-8">
-                    <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h4 className="text-lg font-semibold mb-2">Aucun produit ajouté</h4>
-                    <p className="text-muted-foreground text-center mb-4">
-                      Commencez par ajouter vos premiers produits pour démarrer vos ventes
-                    </p>
-                    <Button asChild>
-                      <Link to="/vendor/products/new">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Ajouter mon premier produit
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.slice(0, 6).map((product) => (
-                    <Card key={product.id}>
-                      <CardContent className="p-4">
-                        <div className="aspect-square bg-muted rounded-lg mb-3 flex items-center justify-center">
-                          {product.image_url ? (
-                            <img 
-                              src={product.image_url} 
-                              alt={product.title}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <Package className="h-8 w-8 text-muted-foreground" />
-                          )}
-                        </div>
-                        <h4 className="font-medium line-clamp-2 mb-2">{product.title}</h4>
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold">{formatPrice(product.price)}</span>
-                          <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
-                            {product.status === 'active' ? 'Actif' : 'Brouillon'}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+            <VendorProductsTab />
           </TabsContent>
 
           {/* Mes boutiques */}
           <TabsContent value="shops">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Mes boutiques</CardTitle>
-                  <CardDescription>
-                    Gérez vos boutiques et leurs informations
-                  </CardDescription>
-                </div>
-                <Button 
-                  onClick={() => navigate('/vendor/shops/new')}
-                  disabled={!isApprovedVendor()}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouvelle boutique
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {shops.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Store className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground mb-4">
-                      {!isApprovedVendor() ? 
-                        "Vous pourrez créer des boutiques une fois votre compte approuvé" :
-                        "Vous n'avez pas encore de boutiques"
-                      }
-                    </p>
-                    {isApprovedVendor() && (
-                      <Button onClick={() => navigate('/vendor/shops/new')}>
-                        Créer votre première boutique
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {shops.map((shop) => (
-                      <Card key={shop.id} className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-semibold">{shop.shop_name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {shop.city}, {shop.province}
-                            </p>
-                          </div>
-                          <Badge variant={shop.is_active ? 'default' : 'secondary'}>
-                            {shop.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <VendorShopsTab />
           </TabsContent>
 
           {/* Profil vendeur */}
           <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle>Profil vendeur</CardTitle>
-                <CardDescription>
-                  Informations de votre compte vendeur
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Informations business</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Nom:</span>
-                        <span>{vendor?.business_name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Type:</span>
-                        <span className="capitalize">{vendor?.business_type}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Email:</span>
-                        <span>{vendor?.email}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Téléphone:</span>
-                        <span>{vendor?.phone || 'Non renseigné'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-3">Statut du compte</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Statut:</span>
-                        <Badge variant={statusInfo.variant}>
-                          {statusInfo.text}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Commission:</span>
-                        <span>{vendor?.commission_rate}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Créé le:</span>
-                        <span>
-                          {vendor?.created_at ? 
-                            new Date(vendor.created_at).toLocaleDateString('fr-FR') : 
-                            'N/A'
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {vendor?.business_description && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Description</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {vendor.business_description}
-                    </p>
-                  </div>
-                )}
-
-                <Button onClick={() => navigate('/vendor/profile/edit')}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Modifier le profil
-                </Button>
-              </CardContent>
-            </Card>
+            <VendorProfileTab />
           </TabsContent>
         </Tabs>
       </main>

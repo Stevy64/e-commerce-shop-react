@@ -11,8 +11,8 @@ import { fr } from "date-fns/locale";
 
 interface ConversationDetailsDialogProps {
   conversationId: string | null;
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 interface Message {
@@ -52,8 +52,8 @@ interface ConversationDetails {
 
 export default function ConversationDetailsDialog({ 
   conversationId, 
-  isOpen, 
-  onClose 
+  open, 
+  onOpenChange 
 }: ConversationDetailsDialogProps) {
   const [conversation, setConversation] = useState<ConversationDetails | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -61,10 +61,10 @@ export default function ConversationDetailsDialog({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (conversationId && isOpen) {
+    if (conversationId && open) {
       fetchConversationDetails();
     }
-  }, [conversationId, isOpen]);
+  }, [conversationId, open]);
 
   const fetchConversationDetails = async () => {
     if (!conversationId) return;
@@ -160,7 +160,7 @@ export default function ConversationDetailsDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
