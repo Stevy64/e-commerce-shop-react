@@ -30,6 +30,7 @@ import {
 import VendorProductsTab from "@/components/VendorProductsTab";
 import VendorShopsTab from "@/components/VendorShopsTab";
 import VendorProfileTab from "@/components/VendorProfileTab";
+import VendorNotifications from "@/components/VendorNotifications";
 
 /**
  * Dashboard vendeur inspiré d'Amazon Seller Central
@@ -195,6 +196,9 @@ const VendorDashboard = () => {
 
           {/* Vue d'ensemble */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Notifications */}
+            <VendorNotifications />
+            
             <div className="grid md:grid-cols-2 gap-6">
               {/* Actions rapides */}
               <Card>

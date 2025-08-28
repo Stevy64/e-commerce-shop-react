@@ -61,7 +61,7 @@ const Checkout = () => {
     setLoading(true);
 
     try {
-      // Create order in database
+      // Créer la commande en base
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -74,7 +74,7 @@ const Checkout = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items
+      // Créer les éléments de commande
       const orderItems = cartItems.map(item => ({
         order_id: order.id,
         product_id: item.product_id,
@@ -88,21 +88,30 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      // Clear cart
+      // Mettre à jour le statut de la commande à 'confirmed'
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ status: 'confirmed' })
+        .eq('id', order.id);
+
+      if (updateError) throw updateError;
+
+      // Vider le panier
       await clearCart();
 
       toast({
-        title: "Commande confirmée",
-        description: "Votre commande a été créée avec succès",
+        title: "Commande confirmée !",
+        description: "Votre commande a été créée avec succès. Les vendeurs ont été notifiés.",
       });
 
-      navigate('/order-success');
+      // Rediriger vers la page de succès avec l'ID de la commande
+      navigate(`/order-success?orderId=${order.id}`);
     } catch (error) {
       console.error('Error creating order:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur s'est produite lors de la création de votre commande",
+        description: "Une erreur s'est produite lors de la création de votre commande. Veuillez réessayer.",
       });
     } finally {
       setLoading(false);
