@@ -970,10 +970,12 @@ export default function SuperAdminDashboard() {
       {/* Dialog des détails de conversation */}
       <ConversationDetailsDialog
         conversationId={selectedConversationId}
-        isOpen={conversationDialogOpen}
-        onClose={() => {
-          setConversationDialogOpen(false);
-          setSelectedConversationId(null);
+        open={conversationDialogOpen}
+        onOpenChange={(open) => {
+          setConversationDialogOpen(open);
+          if (!open) {
+            setSelectedConversationId(null);
+          }
         }}
       />
 
